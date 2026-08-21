@@ -6,6 +6,7 @@ import { isLoopback, sendJson, readBody } from './http.ts'
 import * as git from './git.ts'
 import * as fsOps from './fs.ts'
 import * as searchOps from './search.ts'
+import { copySessionTo } from './session.ts'
 import type { ShellService } from './git.ts'
 import type { FsService } from './fs.ts'
 
@@ -72,6 +73,14 @@ export function apply(ctx: { get(name: string): unknown; effect(cb: () => unknow
     'git.checkout': async (p) => {
       await git.checkout(shell, str(p.cwd), str(p.branch))
       return { ok: true }
+    },
+    'session.copyTo': async (p) => {
+      const srcId = str(p.srcId)
+      const targetPath = str(p.targetPath)
+      if (!srcId) throw new Error('缺少源会话 id')
+      if (!targetPath) throw new Error('缺少目标文件夹')
+      const result = await copySessionTo(ctx, srcId, targetPath)
+      return { ok: true, result }
     },
   }
 
