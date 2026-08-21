@@ -29,7 +29,7 @@ const clientResult = await build({
   entryPoints: ['src/client/index.ts'],
   format: 'cjs',
   platform: 'browser',
-  external: ['react'],
+  external: ['react', 'react-dom'],
   write: false,
 })
 const wrapped = `window.__ModuleLoader__.load({
