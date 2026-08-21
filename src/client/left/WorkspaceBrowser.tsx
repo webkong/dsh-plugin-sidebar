@@ -18,6 +18,7 @@ export interface LeftInject {
   renameWorkspace: (workspaceId: string, title: string) => Promise<void>
   deleteWorkspace: (workspaceId: string) => Promise<void>
   addWorkspace: () => Promise<void>
+  copySessionTo: (sessionId: string, workspace: { workspaceId: string; path: string; title: string }) => Promise<string | undefined>
   timeout: (fn: () => void, ms: number) => () => void
 }
 
@@ -135,6 +136,15 @@ export function WorkspaceBrowser(props: WorkspaceBrowserProps): React.ReactEleme
     expandSidebar()
   }
 
+  /* 复制会话到目标工作区：成功后自动打开新会话 */
+  const copyTo = async (sessionId: string, workspaceId: string): Promise<boolean> => {
+    const ws = workspaces.find((w) => w.workspaceId === workspaceId)
+    if (!ws) throw new Error('unknown workspace ' + workspaceId)
+    const newId = await inject.copySessionTo(sessionId, { workspaceId: ws.workspaceId, path: ws.path, title: ws.title })
+    if (newId) inject.open(newId)
+    return true
+  }
+
   const renderHeader = React.createElement('div', { className: 'sp-header' },
     React.createElement('div', { className: 'sp-title' }, t('workspaces.title')),
     React.createElement('button', {
@@ -184,6 +194,7 @@ export function WorkspaceBrowser(props: WorkspaceBrowserProps): React.ReactEleme
         key: g.key, group: g, expanded: !collapsed.has(g.key), now, t, current,
         open: inject.open, forkSession: inject.forkSession, archiveSession: inject.archiveSession,
         startSession: inject.startSession, onToggle: toggleGroup,
+        workspaces, onCopyTo: copyTo,
         onRenameSession: (id, title) => { void inject.renameSession(id, title).catch(() => {}) },
         onWorkspaceRename: (id, title) => { void inject.renameWorkspace(id, title).catch(() => {}) },
         onWorkspaceDelete: (id) => { void inject.deleteWorkspace(id).catch(() => {}) },

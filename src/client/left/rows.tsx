@@ -1,8 +1,9 @@
 // 左侧行组件：会话卡片 / 搜索结果行 / 工作区分组头（对齐官方 ui-workspace rows/）
 import React from 'react'
-import { Icon } from '../icons.tsx'
+import { Icon, Spinner } from '../icons.tsx'
 import { sessionStatus, pendingLabel, timeLabel } from '../util.ts'
 import type { Translate } from '../i18n.ts'
+import type { WorkspaceView } from '../types.ts'
 import type { SessionNode, GroupNode } from './derive.ts'
 
 export interface SessionCardActions {
@@ -11,7 +12,7 @@ export interface SessionCardActions {
   archiveSession: (id: string) => void
 }
 
-/** 会话卡片：状态点 lane + 标题行（含状态 chip）+ 元信息行（工作区 · 相对时间）+ hover 快捷操作 */
+/** 会话卡片：状态点 lane + 标题行（含状态 chip）+ 元信息行（工作区 · 相对时间）+ hover 快捷操作（含移动到文件夹） */
 export function SessionCard(props: {
   node: SessionNode
   isCurrent: boolean
@@ -19,11 +20,29 @@ export function SessionCard(props: {
   t: Translate
   actions: SessionCardActions
   onRename: (title: string) => void
+  targetWorkspaces: readonly WorkspaceView[]
+  onCopyTo: (id: string, workspaceId: string) => Promise<boolean>
 }): React.ReactElement {
-  const { node, isCurrent, now, t, actions, onRename } = props
+  const { node, isCurrent, now, t, actions, onRename, targetWorkspaces, onCopyTo } = props
   const s = node.session
   const [renaming, setRenaming] = React.useState(false)
   const [draft, setDraft] = React.useState('')
+  const [pickerOpen, setPickerOpen] = React.useState(false)
+  const [copyBusy, setCopyBusy] = React.useState(false)
+  const [copyError, setCopyError] = React.useState('')
+  const pickerRef = React.useRef<HTMLDivElement>(null)
+
+  /* 点击浮层外部时关闭 */
+  React.useEffect(() => {
+    if (!pickerOpen) return undefined
+    const onClick = (event: MouseEvent): void => {
+      if (!(event.target instanceof Node)) return
+      if (pickerRef.current && pickerRef.current.contains(event.target)) return
+      setPickerOpen(false)
+    }
+    document.addEventListener('click', onClick)
+    return () => document.removeEventListener('click', onClick)
+  }, [pickerOpen])
 
   const status = sessionStatus(s)
   const title = s.blank ? t('session.new') : s.displayTitle
@@ -38,6 +57,20 @@ export function SessionCard(props: {
     if (next && next !== s.displayTitle) onRename(next)
   }
   const statusLabel = pendingKind ? pendingLabel(pendingKind, t) : t('status.' + status)
+
+  const runCopy = async (ws: WorkspaceView): Promise<void> => {
+    if (copyBusy) return
+    setCopyBusy(true)
+    setCopyError('')
+    try {
+      await onCopyTo(s.id, ws.workspaceId)
+      setPickerOpen(false)
+    } catch (error) {
+      setCopyError(error instanceof Error ? error.message : String(error))
+    } finally {
+      setCopyBusy(false)
+    }
+  }
 
   return React.createElement('div', {
     className: 'sp-card',
@@ -73,8 +106,26 @@ export function SessionCard(props: {
         React.createElement(Icon, { name: 'pencil', size: 13 })),
       s.blank ? null : React.createElement('button', { type: 'button', className: 'sp-iconBtn osb-sm', title: t('fork'), onClick: () => actions.forkSession(s.id) },
         React.createElement(Icon, { name: 'fork', size: 13 })),
+      React.createElement('button', {
+        type: 'button', className: 'sp-iconBtn osb-sm', title: t('copyTo'), 'aria-label': t('copyTo'),
+        onClick: () => { setCopyError(''); setPickerOpen((v) => !v) },
+      }, React.createElement(Icon, { name: 'move', size: 13 })),
       React.createElement('button', { type: 'button', className: 'sp-iconBtn osb-sm', title: t('archive'), onClick: () => actions.archiveSession(s.id) },
         React.createElement(Icon, { name: 'archive', size: 13 }))),
+    React.createElement('div', { className: 'sp-moveWrap', ref: pickerRef },
+      pickerOpen && React.createElement('div', { className: 'sp-movePicker' },
+        React.createElement('div', { className: 'sp-moveHeader' }, t('copyTo.title')),
+        targetWorkspaces.length === 0
+          ? React.createElement('div', { className: 'sp-moveEmpty' }, t('copyTo.noTarget'))
+          : targetWorkspaces.map((ws) => React.createElement('button', {
+              key: ws.workspaceId, type: 'button', className: 'sp-moveItem', disabled: copyBusy,
+              onClick: () => { void runCopy(ws) },
+            },
+              React.createElement(Icon, { name: 'folder', size: 13 }),
+              React.createElement('span', { className: 'sp-moveItemTitle' }, ws.title),
+              React.createElement('span', { className: 'sp-moveItemPath' }, ws.path),
+              copyBusy ? React.createElement(Spinner, { size: 12 }) : null)),
+        copyError !== '' && React.createElement('div', { className: 'sp-moveError' }, copyError))),
   )
 }
 
@@ -113,15 +164,18 @@ export interface GroupSectionProps {
   onRenameSession: (id: string, title: string) => void
   onWorkspaceRename: (id: string, title: string) => void
   onWorkspaceDelete: (id: string) => void
+  workspaces: readonly WorkspaceView[]
+  onCopyTo: (id: string, workspaceId: string) => Promise<boolean>
 }
 
 /** 工作区分组：组头（chevron + 文件夹 + 标题 + 计数 + hover 操作）+ 会话卡片列表 */
 export function GroupSection(props: GroupSectionProps): React.ReactElement {
-  const { group, expanded, now, t, current, open, forkSession, archiveSession, startSession, onToggle, onRenameSession, onWorkspaceRename, onWorkspaceDelete } = props
+  const { group, expanded, now, t, current, open, forkSession, archiveSession, startSession, onToggle, onRenameSession, onWorkspaceRename, onWorkspaceDelete, workspaces, onCopyTo } = props
   const [renaming, setRenaming] = React.useState(false)
   const [draft, setDraft] = React.useState('')
   const isUngrouped = group.workspaceId === undefined
   const label = isUngrouped ? t('group.ungrouped') : group.label
+  const targetWorkspaces = workspaces.filter((ws) => ws.workspaceId !== group.workspaceId)
 
   const commitWorkspaceRename = (): void => {
     setRenaming(false)
@@ -166,6 +220,7 @@ export function GroupSection(props: GroupSectionProps): React.ReactElement {
           React.createElement(Icon, { name: 'trash', size: 13 })))),
     expanded && group.sessions.map((node) => React.createElement(SessionCard, {
       key: node.id, node, isCurrent: node.id === current, now, t, actions: cardActions,
+      targetWorkspaces, onCopyTo,
       onRename: (title) => onRenameSession(node.id, title),
     })))
 }

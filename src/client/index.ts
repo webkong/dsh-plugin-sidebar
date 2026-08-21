@@ -123,6 +123,10 @@ export function buildLeftInject(ctx: ClientCtx): LeftInject {
     archiveSession: async (sessionId) => { if (workspaces) await workspaces.archiveSession(sessionId) },
     renameWorkspace: async (workspaceId, title) => { if (workspaces) await workspaces.rename(workspaceId, title) },
     deleteWorkspace: async (workspaceId) => { if (workspaces) await workspaces.delete(workspaceId) },
+    copySessionTo: async (sessionId, workspace) => {
+      const result = await call('session.copyTo', { srcId: sessionId, targetPath: workspace.path })
+      return (result.result as { sessionId?: string } | undefined)?.sessionId
+    },
     addWorkspace: async () => {
       if (!workspaces) return
       try {
