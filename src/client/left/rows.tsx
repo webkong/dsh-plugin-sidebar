@@ -1,5 +1,6 @@
 // 左侧行组件：会话卡片 / 搜索结果行 / 工作区分组头（对齐官方 ui-workspace rows/）
 import React from 'react'
+import { createPortal } from 'react-dom'
 import { Icon, Spinner } from '../icons.tsx'
 import { sessionStatus, pendingLabel, timeLabel } from '../util.ts'
 import type { Translate } from '../i18n.ts'
@@ -30,19 +31,39 @@ export function SessionCard(props: {
   const [pickerOpen, setPickerOpen] = React.useState(false)
   const [copyBusy, setCopyBusy] = React.useState(false)
   const [copyError, setCopyError] = React.useState('')
+  const [anchor, setAnchor] = React.useState<{ top?: number; bottom?: number; left: number } | null>(null)
   const pickerRef = React.useRef<HTMLDivElement>(null)
+  const cardRef = React.useRef<HTMLDivElement>(null)
+  const moveBtnRef = React.useRef<HTMLButtonElement>(null)
 
-  /* 点击浮层外部时关闭 */
+  /* 点击浮层外部时关闭（忽略打开按钮本身，避免 toggle 被立即收回） */
   React.useEffect(() => {
     if (!pickerOpen) return undefined
     const onClick = (event: MouseEvent): void => {
       if (!(event.target instanceof Node)) return
+      if (moveBtnRef.current && moveBtnRef.current.contains(event.target)) return
       if (pickerRef.current && pickerRef.current.contains(event.target)) return
       setPickerOpen(false)
     }
     document.addEventListener('click', onClick)
     return () => document.removeEventListener('click', onClick)
   }, [pickerOpen])
+
+  const openPicker = (): void => {
+    setCopyError('')
+    const el = cardRef.current
+    if (el) {
+      const r = el.getBoundingClientRect()
+      const left = Math.max(4, Math.min(r.left, window.innerWidth - 300))
+      // 下方空间充足则向下展开，否则向上（避免浮层超出视口底部）
+      if (window.innerHeight - r.bottom > 240) {
+        setAnchor({ top: r.bottom + 4, left })
+      } else {
+        setAnchor({ bottom: window.innerHeight - r.top + 4, left })
+      }
+    }
+    setPickerOpen((v) => !v)
+  }
 
   const status = sessionStatus(s)
   const title = s.blank ? t('session.new') : s.displayTitle
@@ -74,6 +95,7 @@ export function SessionCard(props: {
 
   return React.createElement('div', {
     className: 'sp-card',
+    ref: cardRef,
     'data-active': isCurrent ? 'true' : 'false',
     onClick: () => actions.open(s.id),
     title: s.cwd || title,
@@ -107,25 +129,28 @@ export function SessionCard(props: {
       s.blank ? null : React.createElement('button', { type: 'button', className: 'sp-iconBtn osb-sm', title: t('fork'), onClick: () => actions.forkSession(s.id) },
         React.createElement(Icon, { name: 'fork', size: 13 })),
       React.createElement('button', {
-        type: 'button', className: 'sp-iconBtn osb-sm', title: t('copyTo'), 'aria-label': t('copyTo'),
-        onClick: () => { setCopyError(''); setPickerOpen((v) => !v) },
+        type: 'button', ref: moveBtnRef, className: 'sp-iconBtn osb-sm', title: t('copyTo'), 'aria-label': t('copyTo'),
+        onClick: openPicker,
       }, React.createElement(Icon, { name: 'move', size: 13 })),
       React.createElement('button', { type: 'button', className: 'sp-iconBtn osb-sm', title: t('archive'), onClick: () => actions.archiveSession(s.id) },
         React.createElement(Icon, { name: 'archive', size: 13 }))),
-    React.createElement('div', { className: 'sp-moveWrap', ref: pickerRef },
-      pickerOpen && React.createElement('div', { className: 'sp-movePicker' },
-        React.createElement('div', { className: 'sp-moveHeader' }, t('copyTo.title')),
-        targetWorkspaces.length === 0
-          ? React.createElement('div', { className: 'sp-moveEmpty' }, t('copyTo.noTarget'))
-          : targetWorkspaces.map((ws) => React.createElement('button', {
-              key: ws.workspaceId, type: 'button', className: 'sp-moveItem', disabled: copyBusy,
-              onClick: () => { void runCopy(ws) },
-            },
-              React.createElement(Icon, { name: 'folder', size: 13 }),
-              React.createElement('span', { className: 'sp-moveItemTitle' }, ws.title),
-              React.createElement('span', { className: 'sp-moveItemPath' }, ws.path),
-              copyBusy ? React.createElement(Spinner, { size: 12 }) : null)),
-        copyError !== '' && React.createElement('div', { className: 'sp-moveError' }, copyError))),
+    pickerOpen && anchor ? createPortal(
+      React.createElement('div', { className: 'sp-moveWrap', ref: pickerRef, style: { position: 'fixed', top: anchor.top, bottom: anchor.bottom, left: anchor.left } },
+        React.createElement('div', { className: 'sp-movePicker' },
+          React.createElement('div', { className: 'sp-moveHeader' }, t('copyTo.title')),
+          targetWorkspaces.length === 0
+            ? React.createElement('div', { className: 'sp-moveEmpty' }, t('copyTo.noTarget'))
+            : targetWorkspaces.map((ws) => React.createElement('button', {
+                key: ws.workspaceId, type: 'button', className: 'sp-moveItem', disabled: copyBusy,
+                onClick: () => { void runCopy(ws) },
+              },
+                React.createElement(Icon, { name: 'folder', size: 13 }),
+                React.createElement('span', { className: 'sp-moveItemTitle' }, ws.title),
+                React.createElement('span', { className: 'sp-moveItemPath' }, ws.path),
+                copyBusy ? React.createElement(Spinner, { size: 12 }) : null)),
+          copyError !== '' && React.createElement('div', { className: 'sp-moveError' }, copyError))),
+      document.body,
+    ) : null,
   )
 }
 
