@@ -52,6 +52,7 @@ export function WorkspaceBrowser(props: WorkspaceBrowserProps): React.ReactEleme
   const [remote, setRemote] = React.useState<RemoteSearch>({ status: 'idle', items: [], hasMore: false })
   const searchInputRef = React.useRef<HTMLInputElement>(null)
   const searchRootRef = React.useRef<HTMLDivElement>(null)
+  const searchBtnRef = React.useRef<HTMLButtonElement>(null)
 
   /* 相对时间 ticker：每 30s 续期刷新 */
   React.useEffect(() => {
@@ -99,11 +100,12 @@ export function WorkspaceBrowser(props: WorkspaceBrowserProps): React.ReactEleme
     return () => { dispose(); ctrl.abort() }
   }, [normalizedQuery, inject.searchSessions, inject.timeout])
 
-  /* 点击搜索框外部且无查询时收起搜索 */
+  /* 点击搜索框外部且无查询时收起搜索（忽略对搜索按钮本身的点击，避免 toggle 被立即收回） */
   React.useEffect(() => {
     if (!wide || !searchExpanded) return undefined
     const onClick = (event: MouseEvent): void => {
       if (!(event.target instanceof Node)) return
+      if (searchBtnRef.current && searchBtnRef.current.contains(event.target)) return
       if (searchRootRef.current && searchRootRef.current.contains(event.target)) return
       if (searchInputRef.current) searchInputRef.current.blur()
       if (normalizedQuery === '') setSearchExpanded(false)
@@ -148,7 +150,7 @@ export function WorkspaceBrowser(props: WorkspaceBrowserProps): React.ReactEleme
   const renderHeader = React.createElement('div', { className: 'sp-header' },
     React.createElement('div', { className: 'sp-title' }, t('workspaces.title')),
     React.createElement('button', {
-      type: 'button', className: 'sp-iconBtn', title: t('search'), 'aria-label': t('search'),
+      type: 'button', ref: searchBtnRef, className: 'sp-iconBtn', title: t('search'), 'aria-label': t('search'),
       onClick: () => { if (searchExpanded) setSearchExpanded(false); else { setSearchExpanded(true); setSearchOnExpand(false) } },
     }, React.createElement(Icon, { name: 'search', size: 16 })),
     React.createElement('button', { type: 'button', className: 'sp-iconBtn', title: t('addWorkspace'), 'aria-label': t('addWorkspace'), onClick: () => { void inject.addWorkspace() } },
