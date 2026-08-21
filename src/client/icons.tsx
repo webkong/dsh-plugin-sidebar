@@ -68,6 +68,7 @@ export function PanelGlyph({ size = 16 }: { size?: number }): React.ReactElement
     viewBox: '0 0 16 16',
     fill: 'none',
     'aria-hidden': true,
+    style: { transform: 'rotate(180deg)' },
   }, React.createElement('path', {
     'fill-rule': 'evenodd',
     'clip-rule': 'evenodd',
