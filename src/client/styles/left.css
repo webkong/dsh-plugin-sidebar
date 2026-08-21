@@ -67,7 +67,7 @@
 .sp-status[data-status='pending'] .sp-dot { animation: sp-pulse 1.6s ease-in-out infinite; }
 .sp-actions { display: none; align-items: center; gap: 2px; flex: none; }
 .sp-card:hover .sp-actions { display: inline-flex; }
-.sp-moveWrap { position: absolute; top: 100%; left: 0; z-index: 40; padding-top: 4px; }
+.sp-moveWrap { position: absolute; top: 100%; left: 0; z-index: 1100; padding-top: 4px; }
 .sp-movePicker { min-width: 210px; max-width: 280px; max-height: 260px; overflow-y: auto; background: var(--dsw-alias-bg-layer-2, var(--dsw-alias-bg-layer-1, #fff)); border: 1px solid var(--sp-border-2); border-radius: 10px; box-shadow: 0 8px 28px color-mix(in srgb, var(--sp-fg) 18%, transparent); padding: 4px; }
 .sp-moveHeader { padding: 6px 8px 4px; font-size: 11px; font-weight: 600; color: var(--sp-fg-faint); text-transform: uppercase; letter-spacing: .04em; }
 .sp-moveItem { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--sp-fg); cursor: pointer; text-align: left; }
