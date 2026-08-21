@@ -67,8 +67,19 @@
 .sp-status[data-status='pending'] .sp-dot { animation: sp-pulse 1.6s ease-in-out infinite; }
 .sp-actions { display: none; align-items: center; gap: 2px; flex: none; }
 .sp-card:hover .sp-actions { display: inline-flex; }
-.sp-moveWrap { z-index: 1100; }
-.sp-movePicker { min-width: 210px; max-width: 280px; max-height: 260px; overflow-y: auto; background: var(--dsw-alias-bg-layer-2, var(--dsw-alias-bg-layer-1, #fff)); border: 1px solid color-mix(in srgb, var(--sp-fg) 24%, transparent); border-radius: 10px; box-shadow: 0 8px 28px color-mix(in srgb, var(--sp-fg) 18%, transparent); padding: 4px; }
+.sp-moveWrap {
+  /* portal 到 document.body 后脱离 .sp-root 作用域，需在此重声明变量 */
+  --sp-fg: var(--dsw-alias-label-primary, #0f1115);
+  --sp-fg-muted: var(--dsw-alias-label-secondary, #61666b);
+  --sp-fg-faint: var(--dsw-alias-label-tertiary, #81858c);
+  --sp-border: var(--dsw-alias-border-l1, rgba(0,0,0,.08));
+  --sp-border-2: var(--dsw-alias-border-l2, rgba(0,0,0,.14));
+  --sp-hover: var(--dsw-alias-interactive-bg-hover, rgba(0,0,0,.05));
+  --sp-green: var(--dsw-alias-state-success-primary, #16a34a);
+  --sp-amber: var(--dsw-alias-state-warn-primary, #d97706);
+  z-index: 1100;
+}
+.sp-movePicker { min-width: 210px; max-width: 280px; max-height: 260px; overflow-y: auto; background: var(--dsw-alias-bg-layer-2, var(--dsw-alias-bg-layer-1, #fff)); border: 1px solid color-mix(in srgb, var(--sp-fg) 30%, transparent); border-radius: 10px; box-shadow: 0 8px 28px color-mix(in srgb, var(--sp-fg) 18%, transparent); padding: 4px; }
 .sp-moveHeader { padding: 6px 8px 4px; font-size: 11px; font-weight: 600; color: var(--sp-fg-faint); text-transform: uppercase; letter-spacing: .04em; }
 .sp-moveItem { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--sp-fg); cursor: pointer; text-align: left; }
 .sp-moveItem:hover { background: var(--sp-hover); }
