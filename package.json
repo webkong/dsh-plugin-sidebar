@@ -1,0 +1,55 @@
+{
+  "name": "@webkong/dsh-plugin-sidebar",
+  "version": "0.1.0",
+  "description": "DSH 左右侧栏插件：左侧工作区/会话卡片浏览（状态点、分组、搜索、快捷操作），右侧文件浏览 + Git 面板（状态/暂存/diff/提交/历史/分支）。Host 侧经 webServer 提供 fs/git JSON API，客户端经 fetch 调用；零外部运行时依赖，可放任意本地路径。",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "sidebar",
+    "git"
+  ],
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test \"test/*.test.ts\"",
+    "check": "npm run typecheck && node --check lib/index.js && node --check lib/client.js && npm test"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/react": "^18.3.31",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.9.3"
+  }
+}

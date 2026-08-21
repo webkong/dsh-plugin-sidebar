@@ -1,0 +1,144 @@
+/* ===== 右侧栏：文件 + Git 面板 ===== */
+.spr-root {
+  --spr-fg: var(--dsw-alias-label-primary, #0f1115);
+  --spr-fg-2: var(--dsw-alias-label-secondary, #61666b);
+  --spr-fg-3: var(--dsw-alias-label-tertiary, #81858c);
+  --spr-border: var(--dsw-alias-border-l1, rgba(0,0,0,.08));
+  --spr-border-2: var(--dsw-alias-border-l2, rgba(0,0,0,.14));
+  --spr-hover: var(--dsw-alias-interactive-bg-hover, rgba(0,0,0,.05));
+  --spr-green: var(--dsw-alias-state-success-primary, #16a34a);
+  --spr-red: var(--dsw-alias-state-error-primary, #dc2626);
+  --spr-blue: var(--dsw-alias-state-business-primary, #3964fe);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: transparent;
+  color: var(--spr-fg);
+  font-family: var(--dsw-font-family, inherit);
+  font-size: 13px;
+  line-height: 18px;
+  user-select: none;
+}
+.spr-root * { box-sizing: border-box; }
+@keyframes spr-spin { to { transform: rotate(360deg); } }
+/* 右侧栏开关（会话头部右上角工具区：紧凑图标按钮） */
+.spr-toggle { cursor: pointer; width: 26px; height: 26px; border: none; border-radius: 6px; background: transparent; color: var(--dsw-alias-label-secondary, #61666b); display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: none; transition: background .15s var(--ds-ease-in-out, ease), color .15s var(--ds-ease-in-out, ease); }
+.spr-toggle:hover { background: var(--spr-hover); color: var(--spr-fg); }
+.spr-topbar { display: flex; align-items: center; gap: 2px; height: 36px; min-height: 36px; padding: 0 4px; border-bottom: 1px solid var(--spr-border); flex: none; }
+.spr-tab { cursor: pointer; display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; border: none; border-radius: 6px; background: transparent; color: var(--spr-fg-2); font-size: 12px; font-weight: 600; line-height: 26px; transition: background .12s var(--ds-ease-in-out, ease), color .12s var(--ds-ease-in-out, ease); }
+.spr-tab:hover { background: var(--spr-hover); color: var(--spr-fg); }
+.spr-tab[data-active='true'] { background: var(--spr-hover); color: var(--spr-fg); }
+.spr-tabSpacer { flex: 1; }
+.spr-iconBtn { cursor: pointer; width: 26px; height: 26px; border: none; border-radius: 6px; background: transparent; color: var(--spr-fg-2); display: inline-flex; align-items: center; justify-content: center; padding: 0; transition: background .12s var(--ds-ease-in-out, ease), color .12s var(--ds-ease-in-out, ease); }
+.spr-iconBtn:hover { background: var(--spr-hover); color: var(--spr-fg); }
+.spr-iconBtn[disabled] { opacity: .4; cursor: default; }
+.spr-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.spr-tree { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 6px 0 16px; scrollbar-width: thin; }
+.spr-tree::-webkit-scrollbar { width: 8px; }
+.spr-tree::-webkit-scrollbar-thumb { background: var(--dsw-alias-scrollbar-bg-l2, rgba(0,0,0,.2)); border-radius: 4px; }
+.spr-tree::-webkit-scrollbar-track { background: transparent; }
+.spr-row { display: flex; align-items: center; gap: 4px; height: 26px; padding: 0 8px; border-radius: 6px; cursor: pointer; color: var(--spr-fg-2); white-space: nowrap; }
+.spr-row:hover { background: var(--spr-hover); color: var(--spr-fg); }
+.spr-row[data-selected='true'] { background: var(--spr-hover); color: var(--spr-fg); }
+.spr-rowIcon { flex: none; width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: var(--spr-fg-3); }
+.spr-rowIcon[data-type='dir'] { color: var(--spr-blue); }
+.spr-rowLabel { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.spr-preview { border-top: 1px solid var(--spr-border); flex: none; max-height: 45%; min-height: 0; display: flex; flex-direction: column; }
+.spr-previewHead { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-bottom: 1px solid var(--spr-border); color: var(--spr-fg-2); font-size: 11px; font-weight: 600; }
+.spr-previewHead .spr-previewName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.spr-previewBody { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 8px 12px; font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 12px; line-height: 18px; white-space: pre; color: var(--spr-fg); }
+.spr-previewNotice { padding: 8px 12px; font-size: 12px; color: var(--spr-fg-3); }
+.spr-git { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.spr-gitHead { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 10px; border-bottom: 1px solid var(--spr-border); flex: none; }
+.spr-branch { display: inline-flex; align-items: center; gap: 4px; min-width: 0; padding: 0 8px; height: 22px; border-radius: 5px; background: var(--spr-hover); color: var(--spr-fg); font-size: 12px; font-weight: 600; }
+.spr-branchName { max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
+.spr-gitBody { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 12px; scrollbar-width: thin; }
+.spr-gitBody::-webkit-scrollbar { width: 8px; }
+.spr-gitBody::-webkit-scrollbar-thumb { background: var(--dsw-alias-scrollbar-bg-l2, rgba(0,0,0,.2)); border-radius: 4px; }
+/* 可折叠 section：头（chevron + 标题 + 计数）+ 主体 */
+.spr-section { display: flex; flex-direction: column; }
+.spr-sectionHead { display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 10px; border-radius: 6px; cursor: pointer; color: var(--spr-fg-3); user-select: none; }
+.spr-sectionHead:hover { background: var(--spr-hover); color: var(--spr-fg-2); }
+.spr-sectionChevron { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; color: var(--spr-fg-3); transition: transform .15s var(--ds-ease-in-out, ease); }
+.spr-sectionTitle { flex: 1; min-width: 0; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.spr-sectionCount { flex: none; font-size: 10px; font-weight: 600; color: var(--spr-fg-3); background: var(--spr-hover); border-radius: 8px; padding: 1px 7px; }
+.spr-sectionBody { display: flex; flex-direction: column; }
+.spr-noChanges { padding: 2px 24px; font-size: 12px; color: var(--spr-fg-3); }
+.spr-fileRow { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 6px; cursor: pointer; color: var(--spr-fg-2); white-space: nowrap; }
+.spr-fileRow:hover { background: var(--spr-hover); color: var(--spr-fg); }
+.spr-fileBadge { flex: none; font-size: 9px; font-weight: 800; line-height: 12px; min-width: 14px; text-align: center; padding: 0 2px; border-radius: 3px; }
+.spr-fileBadge[data-stage='M'] { background: color-mix(in srgb, var(--spr-blue) 16%, transparent); color: var(--spr-blue); }
+.spr-fileBadge[data-stage='A'] { background: color-mix(in srgb, var(--spr-green) 16%, transparent); color: var(--spr-green); }
+.spr-fileBadge[data-stage='D'] { background: color-mix(in srgb, var(--spr-red) 16%, transparent); color: var(--spr-red); }
+.spr-fileBadge[data-stage='?'] { background: var(--spr-hover); color: var(--spr-fg-2); }
+.spr-fileName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.spr-fileActions { display: none; align-items: center; gap: 2px; flex: none; }
+.spr-fileRow:hover .spr-fileActions { display: inline-flex; }
+.spr-commitBox { padding: 8px 10px; border-top: 1px solid var(--spr-border); flex: none; display: flex; flex-direction: column; gap: 6px; }
+.spr-commitError { font-size: 11px; line-height: 16px; color: var(--spr-red); padding: 4px 8px; border-radius: 5px; background: color-mix(in srgb, var(--spr-red) 8%, transparent); }
+.spr-commitInput { width: 100%; height: 30px; border: 1px solid var(--spr-border-2); border-radius: 8px; background: transparent; color: var(--spr-fg); padding: 0 10px; font-size: 13px; outline: none; }
+.spr-commitInput:focus { border-color: var(--spr-blue); }
+.spr-commitBtn { cursor: pointer; height: 28px; border: none; border-radius: 8px; background: var(--spr-blue); color: #fff; font-size: 12px; font-weight: 700; padding: 0 14px; align-self: flex-end; }
+.spr-commitBtn:hover { filter: brightness(1.08); }
+.spr-commitBtn[disabled] { opacity: .45; cursor: default; filter: none; }
+/* 提交历史行：hash + 标题 + refs 徽章 + meta */
+.spr-logRow { display: flex; flex-direction: column; gap: 1px; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
+.spr-logRow:hover { background: var(--spr-hover); }
+.spr-logTop { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.spr-logHash { font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 11px; color: var(--spr-fg-3); flex: none; }
+.spr-logSubject { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 13px; color: var(--spr-fg); }
+.spr-logRefs { flex: none; display: flex; align-items: center; gap: 3px; max-width: 40%; overflow: hidden; }
+.spr-logRef { flex: none; font-size: 9px; font-weight: 600; line-height: 12px; padding: 0 5px; border-radius: 3px; white-space: nowrap; }
+.spr-logRef[data-kind='branch'] { background: color-mix(in srgb, var(--spr-blue) 16%, transparent); color: var(--spr-blue); }
+.spr-logRef[data-kind='tag'] { background: color-mix(in srgb, var(--spr-green) 16%, transparent); color: var(--spr-green); }
+.spr-logRef[data-kind='head'] { background: color-mix(in srgb, var(--spr-blue) 16%, transparent); color: var(--spr-blue); }
+.spr-logMeta { font-size: 11px; color: var(--spr-fg-3); padding-left: 18px; }
+.spr-diff { border-top: 1px solid var(--spr-border); flex: none; max-height: 50%; min-height: 0; display: flex; flex-direction: column; }
+.spr-diffHead { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-bottom: 1px solid var(--spr-border); color: var(--spr-fg-2); font-size: 11px; font-weight: 600; }
+.spr-diffHead .spr-diffName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.spr-diffBody { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 8px 12px; font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 12px; line-height: 18px; white-space: pre; }
+.spr-diffBody .spr-diffAdd { color: var(--spr-green); }
+.spr-diffBody .spr-diffDel { color: var(--spr-red); }
+.spr-diffBody .spr-diffMeta { color: var(--spr-fg-3); }
+.spr-empty { padding: 28px 16px; text-align: center; color: var(--spr-fg-3); font-size: 12px; line-height: 18px; }
+.spr-spinnerWrap { display: flex; justify-content: center; padding: 18px 0; color: var(--spr-fg-3); }
+
+/* ── 文件搜索（Names / Contents 两种模式）── */
+.spr-search { padding: 8px 10px 6px; border-bottom: 1px solid var(--spr-border); flex: none; display: flex; flex-direction: column; gap: 6px; }
+.spr-searchBox { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border: 1px solid var(--spr-border-2); border-radius: 6px; background: transparent; color: var(--spr-fg); }
+.spr-searchBox:focus-within { border-color: var(--spr-blue); }
+.spr-searchInput { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: inherit; font-size: 12px; line-height: 18px; }
+.spr-searchInput::placeholder { color: var(--spr-fg-3); }
+.spr-searchClear { cursor: pointer; width: 20px; height: 20px; border: none; background: transparent; border-radius: 4px; color: var(--spr-fg-3); display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+.spr-searchClear:hover { background: var(--spr-hover); color: var(--spr-fg); }
+/* 分段 tab（圆角容器 + 内部分段按钮，选中段浮起） */
+.spr-modeSwitch { display: flex; align-items: center; gap: 2px; height: 26px; padding: 2px; border-radius: 7px; background: var(--spr-hover); flex: none; }
+.spr-modeBtn { cursor: pointer; flex: 1; height: 22px; border: none; border-radius: 5px; background: transparent; color: var(--spr-fg-3); font-size: 11px; font-weight: 500; padding: 0 10px; transition: background .12s var(--ds-ease-in-out, ease), color .12s var(--ds-ease-in-out, ease), box-shadow .12s var(--ds-ease-in-out, ease); }
+.spr-modeBtn:hover { color: var(--spr-fg); }
+.spr-modeBtn[data-active='true'] { background: var(--dsw-alias-bg-layer-1, #fff); color: var(--spr-fg); font-weight: 600; box-shadow: 0 1px 2px color-mix(in srgb, var(--spr-fg) 10%, transparent); }
+.spr-searchResults { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 0 12px; scrollbar-width: thin; }
+.spr-searchResults::-webkit-scrollbar { width: 8px; }
+.spr-searchResults::-webkit-scrollbar-thumb { background: var(--dsw-alias-scrollbar-bg-l2, rgba(0,0,0,.2)); border-radius: 4px; }
+.spr-nameRow { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 12px; border-radius: 6px; cursor: pointer; color: var(--spr-fg-2); white-space: nowrap; }
+.spr-nameRow:hover { background: var(--spr-hover); color: var(--spr-fg); }
+.spr-nameIcon { flex: none; color: var(--spr-fg-3); }
+.spr-nameIcon[data-type='dir'] { color: var(--spr-blue); }
+.spr-namePath { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+.spr-contentRow { display: flex; flex-direction: column; gap: 1px; padding: 4px 12px; border-radius: 6px; cursor: pointer; }
+.spr-contentRow:hover { background: var(--spr-hover); }
+.spr-contentPath { font-size: 11px; color: var(--spr-fg-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spr-contentLine { display: flex; gap: 8px; min-width: 0; font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 11px; line-height: 16px; }
+.spr-contentLineNo { flex: none; color: var(--spr-fg-3); min-width: 22px; text-align: right; }
+.spr-contentLineText { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--spr-fg-2); white-space: nowrap; }
+.spr-searchEmpty { padding: 24px 16px; text-align: center; color: var(--spr-fg-3); font-size: 12px; }
+
+/* ── 文件行尾部 git 状态徽标 ── */
+.spr-fileBadge { flex: none; font-size: 9px; font-weight: 800; line-height: 12px; min-width: 14px; text-align: center; padding: 0 2px; border-radius: 3px; margin-left: auto; }
+.spr-fileBadge[data-stage='M'] { background: color-mix(in srgb, var(--spr-blue) 16%, transparent); color: var(--spr-blue); }
+.spr-fileBadge[data-stage='A'] { background: color-mix(in srgb, var(--spr-green) 16%, transparent); color: var(--spr-green); }
+.spr-fileBadge[data-stage='D'] { background: color-mix(in srgb, var(--spr-red) 16%, transparent); color: var(--spr-red); }
+.spr-fileBadge[data-stage='R'] { background: color-mix(in srgb, var(--spr-blue) 16%, transparent); color: var(--spr-blue); }
+.spr-fileBadge[data-stage='C'] { background: color-mix(in srgb, var(--spr-blue) 16%, transparent); color: var(--spr-blue); }
+.spr-fileBadge[data-stage='?'] { background: var(--spr-hover); color: var(--spr-fg-2); }

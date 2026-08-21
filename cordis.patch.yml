@@ -1,0 +1,9 @@
+# dsh-plugin-sidebar bundle patch: 装载 左右侧栏（工作区浏览 + 文件/Git 面板）
+# 安装方式（本地路径 / 已 publish 的 npm 包均可）：
+#   dsh plugin --profile <name> add @webkong/dsh-plugin-sidebar@<version>
+# 或手动在 profile 的 cordis.patch.yml 里 insert 本行。
+# 插件自带 Host + Client 两个半区：Host 提供 /dsp-sidebar/api 的 fs/git JSON API，
+# Client 注册 sidebar.workspaces / details / sidebar.footer.action 三个席位。
+- insert:
+    - id: dsp-sidebar
+      name: '@webkong/dsh-plugin-sidebar'
