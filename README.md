@@ -1,105 +1,141 @@
+<p align="center">
+  <b>🗂️ 为 DeepSeek Harness 而生的左右侧栏</b><br />
+  左侧 · 工作区/会话浏览 —— 右侧 · 文件 + Git 面板
+</p>
+
+<p align="center">
+  <a href="#-功能亮点">功能亮点</a> ·
+  <a href="#-安装">安装</a> ·
+  <a href="#-开发">开发</a> ·
+  <a href="#-架构">架构</a> ·
+  <a href="#-许可证">许可证</a>
+</p>
+
+---
+
 # dsh-plugin-sidebar
 
-DSH 左右侧栏插件，单包内置 Host + Client 两个半区。源码为 TypeScript 模块化组织（参考官方 ui 插件结构），构建产物在 `lib/`。
+让 DeepSeek Harness 的**会话管理第一次像 IDE 一样顺手**。
 
-## 功能
+左侧栏按工作区浏览全部会话（状态点、分组、搜索、一键操作），右侧栏在会话内就地浏览文件、检视 Git 变更、提交、切分支——装完即用，风格跟随 DSH 主题自动适配浅色/深色。
 
-**左侧栏（`sidebar.workspaces`）** — 工作区/会话浏览
-- 会话卡片：状态点 lane（运行=绿色脉冲 / 等待=琥珀 / 完成=绿 / 空闲=灰）
-- 按工作区分组，组头可折叠（文件夹图标 + 标题 + 计数 + chevron）
-- 当前会话卡片高亮（边框 + 背景洗 + 阴影）
-- 卡片 hover 快捷操作：重命名（行内编辑）/ 复制 fork / 归档
-- 顶部搜索：本地标题/cwd/工作区匹配 + 远端内容搜索合并（250ms 防抖）
-- 组头 hover：在此新建会话 / 重命名工作区 / 删除工作区
-- rail 窄栏模式（侧栏折叠为图标列）
+## ✨ 功能亮点
 
-**右侧栏（`details` 列 + 会话头部开关）** — 文件浏览 + Git 面板
-- 会话头部右上角开关（`conversation.session.header.utilities`，与会话日志下载按钮并列）
-  - **开关状态按会话记忆**：某会话打开过右栏，切走再切回仍保持打开；其他会话默认关闭
-- 顶部活动条：文件 / Git 标签 + 关闭按钮
-- 文件浏览器：
-  - 懒加载目录树（展开目录时才向 Host 拉取子列表）
-  - **搜索文件名**：Names 模式，递归匹配文件名（大小写不敏感，`.git` 跳过，预算上限防失控）
-  - **搜索文件内容**：Contents 模式，逐行匹配并展示 文件/行号/行内容
-  - 点击文件底部预览（文本 512KB 截断 / 二进制提示）
-- Git 面板：状态分「已暂存 / 更改」两段（`--porcelain=v1 -z` NUL 解析）、行内暂存/取消/放弃、着色 diff、提交框、分支切换、提交历史
+### 🧭 左侧栏 · 工作区/会话浏览
+- **按工作区分组**：组头可折叠（文件夹图标 + 标题 + 计数 + chevron），当前会话卡片高亮
+- **会话状态一眼可见**：运行中（绿色脉冲）/ 等待处理（琥珀）/ 完成 / 空闲，状态点 lane + 标题 chip
+- **卡片 hover 快捷操作**：重命名（行内编辑）/ 复制 fork / 归档 / **移动到文件夹**
+- **顶部搜索**：本地标题/cwd/工作区匹配 + 远端内容搜索合并（250ms 防抖），`Esc` 收起
+- **组头 hover**：在此新建会话 / 重命名工作区 / 删除工作区
+- **rail 窄栏模式**：侧栏折叠为图标列，点搜索/新建自动展开
 
-## 安装
+### 📁 右侧栏 · 文件浏览 + Git 面板
+- **会话头部右上角开关**（与会话日志下载并列），**开关状态按会话记忆**：某会话开过右栏，切走再切回仍保持打开
+- **文件浏览器**：懒加载目录树（展开才拉子列表）、按文件名搜索、按内容搜索（文件/行号/行内容）、点击预览（文本 512KB 截断 / 二进制提示）
+- **Git 面板**：状态分「已暂存 / 更改」两段（`--porcelain=v1 -z` NUL 解析）、行内暂存/取消/放弃、着色 diff、提交框、分支切换、提交历史
 
-本地路径或已发布 npm 包均可：
+### 🔀 会话移动到文件夹
+- 复制语义（fork）：源会话保留，在目标工作区创建继承**全部已完成历史**的新会话，创建后自动打开
+- 走官方 `agents.create(seed + meta.cwd)` 路径，新建的是 **agent**（生命周期归 agent 注册表，不随插件停止消失）
+- 目标工作区选择浮层：`createPortal` 到 body + `position: fixed` 锚定，脱离列表 `overflow` 裁剪，靠近视口底部自动向上展开
 
-```bash
-dsh plugin --profile <name> add @webkong/dsh-plugin-sidebar@0.1.0
-```
+### 🌏 为中文用户打磨
+- 全中文界面 + English，跟随 DSH 语言偏好自动切换
+- 全部使用 DSH 主题 token（`--dsw-alias-*` / `--ds-*`），浅色/深色自动适配
 
-或手动在 profile 的 `cordis.patch.yml` 中插入：
-
-```yaml
-- insert:
-    - id: dsp-sidebar
-      name: '@webkong/dsh-plugin-sidebar'
-```
-
-## 构建与检查
+## 📦 安装
 
 ```bash
-npm install            # 安装 esbuild / typescript（仅开发期）
-npm run build          # src/ → lib/（Host ESM + Client __ModuleLoader__ bundle）
-npm run typecheck      # tsc --noEmit
-npm test               # 纯函数单元测试（node:test，Node 24 type stripping 直接跑 test/*.test.ts）
-npm run check          # 类型检查 + 产物语法检查 + 单元测试
+# 从 GitHub 安装
+dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#main
+
+# 或从本地路径安装（开发）
+dsh plugin --profile web add /path/to/dsh-plugin-sidebar
 ```
 
-## 单元测试
+重启 dsh web 后，左侧栏接管 `sidebar.workspaces`，右侧栏接管 `details` 列，会话头部出现右栏开关。
 
-`test/` 覆盖全部纯函数（无 React/DOM 依赖，零外部依赖运行）：
+> ⚠️ 安装 / 重启后生效；Host 改动需重启 dsh web，Client 改动（`lib/client.js`）刷新页面即可。
 
-| 文件 | 覆盖 |
+## 🔧 开发
+
+```bash
+npm install          # 安装 esbuild / typescript（仅开发期）
+npm run build        # esbuild 打包 src/ → lib/（Host ESM + Client __ModuleLoader__ bundle）
+npm run typecheck    # tsc --noEmit 严格类型检查
+npm test             # node --test 纯函数单元测试（40 用例）
+npm run check        # typecheck + 产物语法检查 + 单元测试
+```
+
+### 结构（TypeScript 模块化）
+
+源码为 TypeScript 模块化组织（参考官方 ui 插件结构），构建产物在 `lib/`：
+
+```
+dsh-plugin-sidebar/
+├── package.json              # dsh.bundle / dsh.client 声明，scripts
+├── cordis.patch.yml          # bundle patch：装载 dsp-sidebar 行
+├── build.mjs                 # esbuild 构建（Host ESM + Client __ModuleLoader__ bundle）
+├── tsconfig.json             # 严格类型检查（node + DOM/React）
+├── lib/                      # 构建产物（已 gitignore）
+│   ├── index.js              # Host 单文件 ESM bundle
+│   └── client.js             # Client __ModuleLoader__ bundle
+├── src/
+│   ├── host/                 # Host 源码（Node 环境）
+│   │   ├── index.ts          # 入口：name/inject/apply + webServer 路由注册
+│   │   ├── session.ts        # 会话复制（移动到文件夹）：readSession → cut → agents.create(seed+meta.cwd)
+│   │   ├── git.ts            # Git 操作：runGit + porcelain/NUL/log 解析
+│   │   ├── fs.ts             # 文件系统操作：列目录 / 读文本（512KB 截断）
+│   │   ├── search.ts         # 搜索：文件名递归匹配 + 内容逐行匹配
+│   │   └── http.ts           # JSON 响应 / loopback 校验 / 请求体 / 参数转义
+│   └── client/               # Client 源码（DOM + React 环境）
+│       ├── index.ts          # apply 入口：注入样式 / 注册词典 / 注册席位
+│       ├── api.ts            # /dsp-sidebar/api fetch 封装
+│       ├── i18n.ts           # 中英双语词典（NS 与键类型）
+│       ├── types.ts          # 契约：会话/工作区数据面 + Host API 面 + git wire 形状
+│       ├── util.ts           # 共享工具：相对时间 / basename / 状态推导
+│       ├── icons.tsx         # 图标（lucide 风格描边 + 右侧栏面板填充图标）
+│       ├── styles/           # 按组件域拆分 CSS + 聚合注入
+│       │   ├── left.css      # 左侧栏样式
+│       │   ├── right.css     # 右侧栏样式
+│       │   └── index.ts      # injectStyles（幂等注入一个 style 标签）
+│       ├── left/             # 左侧栏（对齐官方 WorkspaceBrowser + rows/）
+│       │   ├── derive.ts     # 数据推导：分组 / 搜索合并
+│       │   ├── rows.tsx      # 行组件：SessionCard / SearchRow / GroupSection（含移动浮层 portal）
+│       │   └── WorkspaceBrowser.tsx  # 主组件：标题头 + 搜索 + 列表 + rail
+│       └── right/            # 右侧栏（对齐官方 RightSidebar + SourceControl + FileExplorer）
+│           ├── derive.ts     # git 状态分类（badge / staged / unstaged / untracked）
+│           ├── FilesPanel.tsx   # 文件浏览器（懒加载树 + 搜索 + 预览）
+│           ├── GitPanel.tsx     # Git 面板（状态 / 暂存 / diff / 提交 / 历史 / 分支）
+│           └── RightPanel.tsx   # 面板外壳（活动条 + 标签切换）+ 头部开关
+└── test/                     # 纯函数单元测试（node --test）
+```
+
+## 📡 通信契约
+
+Host 通过 `webServer` 前缀路由 `/dsp-sidebar/api` 提供 HTTP API（仅限本机 loopback，POST + 方法名在路径末段），客户端用浏览器 `fetch` 调用：
+
+| 方法 | 说明 |
 | --- | --- |
-| `test/host.test.ts` | `http`（isLoopback/shq/shellJoin）、`git`（porcelain/log 解析、isGitRepo/status/diff/branches，mock shell） |
-| `test/fs-search.test.ts` | `fs`（listDir/readText 截断/目录判定，mock fs）、`search`（文件名递归/跳过 .git/预算截断、内容搜索行解析） |
-| `test/client.test.ts` | `util`（相对时间/basename/状态推导）、`left/derive`（分组/归档/blank/搜索合并）、`right/derive`（badge/staged 分类） |
+| `fs.list` | 列目录（`{path}`） |
+| `fs.read` | 读文本（512KB 截断，二进制返回 `kind:'binary'`） |
+| `fs.search` | 搜索（`{mode: 'name'\|'content', path, query}`） |
+| `fs.gitStatus` | 目录 git 状态映射（path → XY，供文件徽标） |
+| `git.status` | git 状态（`{cwd}`） |
+| `git.diff` | diff（`{cwd, path?, staged?}`） |
+| `git.stage` / `git.unstage` | 暂存 / 取消暂存（`{cwd, path?}`） |
+| `git.discard` | 放弃更改（`{cwd, path}`） |
+| `git.commit` | 提交（`{cwd, message}`） |
+| `git.log` | 提交历史（`{cwd, count?}`） |
+| `git.branches` | 分支列表（`{cwd}`） |
+| `git.checkout` | 切换分支（`{cwd, branch}`） |
+| `session.copyTo` | 复制会话到目标工作区（`{srcId, targetPath}`）→ 返回 `{sessionId}` |
 
-## 源码结构（模块化）
+## 🏗 架构
 
-```
-src/
-├── host/                    # Host 半区（ESM，经 webServer 暴露 /dsp-sidebar/api）
-│   ├── index.ts             # 入口：路由装配 + API 方法表
-│   ├── http.ts              # HTTP 辅助：JSON 响应 / 请求体 / 回环校验 / 参数转义
-│   ├── git.ts               # Git 操作：runGit + porcelain/NUL/log 解析 + 各方法
-│   ├── fs.ts                # 文件系统操作：列目录 / 读文本（512KB 截断）
-│   └── search.ts            # 搜索：文件名递归匹配 + 内容逐行匹配
-└── client/                  # Client 半区（esbuild → __ModuleLoader__ bundle）
-    ├── index.ts             # 入口：注入样式 / 注册词典 / 注册席位
-    ├── api.ts               # /dsp-sidebar/api fetch 封装
-    ├── i18n.ts              # 中英双语词典（NS 与键类型）
-    ├── types.ts             # 契约：会话/工作区数据面 + Host API 面 + git wire 形状
-    ├── util.ts              # 共享工具：相对时间 / basename / 状态推导
-    ├── icons.tsx            # 图标（lucide 风格内联 SVG）
-    ├── styles/              # 按组件域拆分 CSS + 聚合注入
-    │   ├── left.css         # 左侧栏样式
-    │   ├── right.css        # 右侧栏样式
-    │   └── index.ts         # injectStyles（幂等注入一个 style 标签）
-    ├── left/                # 左侧栏（对齐官方 WorkspaceBrowser + rows/ + tree/）
-    │   ├── derive.ts        # 数据推导：分组 / 搜索合并
-    │   ├── rows.tsx         # 行组件：SessionCard / SearchRow / GroupSection
-    │   └── WorkspaceBrowser.tsx  # 主组件：标题头 + 搜索 + 列表 + rail
-    └── right/               # 右侧栏（对齐官方 RightSidebar + SourceControl + FileExplorer）
-        ├── derive.ts        # git 状态分类（badge / staged / unstaged / untracked）
-        ├── FilesPanel.tsx   # 文件浏览器（懒加载树 + 搜索 + 预览）
-        ├── GitPanel.tsx     # Git 面板（状态 / 暂存 / diff / 提交 / 历史 / 分支）
-        └── RightPanel.tsx   # 面板外壳（活动条 + 标签切换）+ 头部开关
-```
+- **Host**（`src/host/`）：经 `webServer` 注册 `/dsp-sidebar/api` 前缀路由。文件操作走挂载的 `fs` 服务（`resolve` → `listDir`/`stat`/`readText`/`readBytes`，尊重沙箱与观测策略）；Git 操作走挂载的 `shell` 服务（`resolve` + `run`，`git -C <cwd>` + porcelain/NUL 解析，与官方 bash 工具同一执行通路）
+- **Client**（`src/client/`）：`fetch('/dsp-sidebar/api/...')` 调用 Host；注册席位（`sidebar.workspaces` / `details` / `conversation.session.header.utilities`）；会话复制走 `sessionQuery` / `workspaceRegistry` / `agents` 等 Host 服务（懒解析——这些服务异步激活，调用时 `ctx.get` 而非 apply 阶段缓存）
 
-## 架构
+## 📄 许可证
 
-- **Host**（`src/host/`）：经 `webServer` 注册 `/dsp-sidebar/api` 前缀路由（POST，方法名在路径末段），提供方法：
-  `fs.list` / `fs.read` / `fs.search`（文件名 + 内容）/ `git.status` / `git.diff` / `git.stage` / `git.unstage` / `git.discard` / `git.commit` / `git.log` / `git.branches` / `git.checkout`
-  - 文件操作走挂载的 `fs` 服务（`resolve` → `listDir`/`stat`/`readText`/`readBytes`），尊重沙箱与观测策略
-  - Git 操作走挂载的 `shell` 服务（`resolve` + `run`，`git -C <cwd>` + porcelain/NUL 解析），与官方 bash 工具同一执行通路
-- **Client**（`src/client/`）：`fetch('/dsp-sidebar/api/...')` 调用 Host；注册席位（`sidebar.workspaces` / `details` / `conversation.session.header.utilities`），全部使用 DSH 主题 token（`--dsw-alias-*` / `--ds-*`），随浅色/深色自适应
-
-## License
-
-MIT
+[MIT](LICENSE)
