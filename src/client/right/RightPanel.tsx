@@ -1,7 +1,7 @@
 // 右侧面板外壳：顶部活动条（文件 / Git 标签 + 关闭）+ 面板切换
 // 会话 cwd 来自 useSessions 标准 prop；右侧栏开关状态按会话记忆（切换会话保持各自开/关）。
 import React from 'react'
-import { Icon } from '../icons.tsx'
+import { Icon, PanelGlyph } from '../icons.tsx'
 import { FilesPanel } from './FilesPanel.tsx'
 import { GitPanel } from './GitPanel.tsx'
 import { markDetailsOpen, markDetailsClosed, detailsIntentOf } from './panelState.ts'
@@ -75,5 +75,5 @@ export function RightToggle(props: {
   }
   return React.createElement('button', {
     type: 'button', className: 'spr-toggle', title: t('open'), 'aria-label': t('open'), onClick,
-  }, React.createElement(Icon, { name: 'panel', size: 15 }))
+  }, React.createElement(PanelGlyph, { size: 16 }))
 }
