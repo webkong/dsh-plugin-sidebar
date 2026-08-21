@@ -44,7 +44,8 @@
     "lib",
     "cordis.patch.yml",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "assets"
   ],
   "devDependencies": {
     "@types/node": "^20.19.43",

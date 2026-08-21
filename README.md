@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="assets/sidebar.png" alt="dsh-plugin-sidebar：左侧工作区/会话浏览，右侧文件与 Git 面板" width="1000" />
+</p>
+
+<p align="center">
   <b>🗂️ 为 DeepSeek Harness 而生的左右侧栏</b><br />
   左侧 · 工作区/会话浏览 —— 右侧 · 文件 + Git 面板
 </p>
