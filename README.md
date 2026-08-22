@@ -35,8 +35,10 @@
 
 ### 📁 右侧栏 · 文件浏览 + Git 面板
 - **会话头部右上角开关**（与会话日志下载并列），**开关状态按会话记忆**：某会话开过右栏，切走再切回仍保持打开
-- **文件浏览器**：懒加载目录树（展开才拉子列表）、按文件名搜索、按内容搜索（文件/行号/行内容）、点击预览（文本 512KB 截断 / 二进制提示）
-- **Git 面板**：状态分「已暂存 / 更改」两段（`--porcelain=v1 -z` NUL 解析）、行内暂存/取消/放弃、着色 diff、提交框、分支切换、提交历史
+- **文件浏览器**：懒加载目录树（展开才拉子列表）、按文件名搜索、按内容搜索（文件/行号/行内容）、**目录 git 状态聚合徽标**（子文件最高优先级 D>M>A>R>U）
+- **文件预览 tab**：主区域「对话 / 轨迹」之后新增**文件预览** tab，右侧栏点文件自动切换过去预览（文本 512KB 截断 / 二进制提示）
+- **Git 面板**：状态分「已暂存 / 更改」两段（`--porcelain=v1 -z` NUL 解析）、行内暂存/取消/放弃、着色 diff、提交框、分支切换
+- **提交历史（VSCode 源码控制风格）**：时间线圆点 + 竖线连接、提交信息单行截断，展开显示作者·日期 + 该提交**改动文件列表**（状态字母 M/A/D 着色），文件按需懒加载
 
 ### 🔀 会话移动到文件夹
 - 复制语义（fork）：源会话保留，在目标工作区创建继承**全部已完成历史**的新会话，创建后自动打开
@@ -67,7 +69,7 @@ dsh plugin --profile web add /path/to/dsh-plugin-sidebar
 npm install          # 安装 esbuild / typescript（仅开发期）
 npm run build        # esbuild 打包 src/ → lib/（Host ESM + Client __ModuleLoader__ bundle）
 npm run typecheck    # tsc --noEmit 严格类型检查
-npm test             # node --test 纯函数单元测试（40 用例）
+npm test             # node --test 纯函数单元测试（42 用例）
 npm run check        # typecheck + 产物语法检查 + 单元测试
 ```
 
@@ -99,18 +101,22 @@ dsh-plugin-sidebar/
 │       ├── types.ts          # 契约：会话/工作区数据面 + Host API 面 + git wire 形状
 │       ├── util.ts           # 共享工具：相对时间 / basename / 状态推导
 │       ├── icons.tsx         # 图标（lucide 风格描边 + 右侧栏面板填充图标）
+│       ├── previewStore.ts   # 文件预览共享 store（sessionId 隔离，useSyncExternalStore 订阅）
+│       ├── preview/          # 主区域「文件预览」view
+│       │   └── PreviewView.tsx  # conversation.view occupant：订阅 previewStore 渲染预览
 │       ├── styles/           # 按组件域拆分 CSS + 聚合注入
 │       │   ├── left.css      # 左侧栏样式
 │       │   ├── right.css     # 右侧栏样式
+│       │   ├── preview.css   # 主区域预览 tab 样式（全局 dsw token）
 │       │   └── index.ts      # injectStyles（幂等注入一个 style 标签）
 │       ├── left/             # 左侧栏（对齐官方 WorkspaceBrowser + rows/）
 │       │   ├── derive.ts     # 数据推导：分组 / 搜索合并
 │       │   ├── rows.tsx      # 行组件：SessionCard / SearchRow / GroupSection（含移动浮层 portal）
 │       │   └── WorkspaceBrowser.tsx  # 主组件：标题头 + 搜索 + 列表 + rail
 │       └── right/            # 右侧栏（对齐官方 RightSidebar + SourceControl + FileExplorer）
-│           ├── derive.ts     # git 状态分类（badge / staged / unstaged / untracked）
-│           ├── FilesPanel.tsx   # 文件浏览器（懒加载树 + 搜索 + 预览）
-│           ├── GitPanel.tsx     # Git 面板（状态 / 暂存 / diff / 提交 / 历史 / 分支）
+│           ├── derive.ts     # git 状态分类（badge / staged / unstaged / untracked / 目录聚合 dirBadge）
+│           ├── FilesPanel.tsx   # 文件浏览器（懒加载树 + 搜索 + 预览 + git 徽标）
+│           ├── GitPanel.tsx     # Git 面板（状态 / 暂存 / diff / 提交 / 时间线历史 / 分支）
 │           └── RightPanel.tsx   # 面板外壳（活动条 + 标签切换）+ 头部开关
 └── test/                     # 纯函数单元测试（node --test）
 ```
@@ -131,6 +137,7 @@ Host 通过 `webServer` 前缀路由 `/dsp-sidebar/api` 提供 HTTP API（仅限
 | `git.discard` | 放弃更改（`{cwd, path}`） |
 | `git.commit` | 提交（`{cwd, message}`） |
 | `git.log` | 提交历史（`{cwd, count?}`） |
+| `git.logFiles` | 某次提交改动文件（`{cwd, hash}`，name-status 解析） |
 | `git.branches` | 分支列表（`{cwd}`） |
 | `git.checkout` | 切换分支（`{cwd, branch}`） |
 | `session.copyTo` | 复制会话到目标工作区（`{srcId, targetPath}`）→ 返回 `{sessionId}` |
