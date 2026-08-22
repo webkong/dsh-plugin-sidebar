@@ -18,6 +18,8 @@
 
 ---
 
+> 🌐 **简体中文**: 见 [README.md](README.md) · English in this file
+
 # dsh-plugin-sidebar
 
 Make DeepSeek Harness **session management feel like an IDE**.
@@ -38,7 +40,8 @@ Browse every session by workspace on the left (status dots, groups, search, one-
 - **Session-header toggle** (next to the session log download); **toggle state is remembered per session** — a session you opened the panel in stays open after switching away and back
 - **File explorer**: lazy directory tree (expand to load children), name search, content search (file/line/text), **directory git-status aggregation badges** (highest priority D>M>A>R>U of changed files underneath)
 - **File preview tab**: a **File preview** tab after the main region's **Conversation / Trajectory** tabs; clicking a file in the right sidebar auto-switches there to preview (512 KB text truncation / binary notice)
-- **Git panel**: status split into **Staged / Changes** (`--porcelain=v1 -z` NUL parsing), inline stage/unstage/discard, colored diff, commit box, branch switch
+- **Git panel**: status split into **Staged / Changes** (`--porcelain=v1 -z` NUL parsing), colored diff, commit box, branch switch
+- **Bulk actions (VSCode Source Control style, on section-header hover)**: `Stage all`(+) / `Unstage all`(−) / `Discard all`(undo); per-file row hover: diff(file) + stage(+)/unstage(−) + discard(undo)
 - **Commit history (VSCode Source Control style)**: timeline dots + connector line, one-line-truncated message; expand to reveal author · date + that commit's **changed-file list** (M/A/D colored letters), files lazy-loaded on demand
 
 ![Right sidebar file explorer + file preview tab](assets/file-explorer.png)
