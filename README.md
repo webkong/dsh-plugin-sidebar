@@ -54,7 +54,7 @@
 - 目标工作区选择浮层：`createPortal` 到 body + `position: fixed` 锚定，脱离列表 `overflow` 裁剪，靠近视口底部自动向上展开
 
 ### 🌏 为中文用户打磨
-- 全中文界面 + English，跟随 DSH 语言偏好自动切换
+- 全中文界面 + English，跟随 DSH 语言偏好自动切换 
 - 全部使用 DSH 主题 token（`--dsw-alias-*` / `--ds-*`），浅色/深色自动适配
 
 ## 📦 安装

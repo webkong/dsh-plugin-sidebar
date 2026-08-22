@@ -96,6 +96,10 @@ export const zh = {
   'search.tooMany': '结果过多，请缩小范围',
   'view.preview': '文件预览',
   'preview.none': '点击左侧文件查看预览',
+  'save': '保存',
+  'saving': '保存中…',
+  'saved': '已保存',
+  'dirty': '有未保存更改',
 } as const
 
 export const en: Record<keyof typeof zh, string> = {
@@ -191,6 +195,10 @@ export const en: Record<keyof typeof zh, string> = {
   'search.tooMany': 'Too many results, narrow the query',
   'view.preview': 'File preview',
   'preview.none': 'Click a file to preview',
+  'save': 'Save',
+  'saving': 'Saving…',
+  'saved': 'Saved',
+  'dirty': 'Unsaved changes',
 }
 
 export type DictKey = keyof typeof zh

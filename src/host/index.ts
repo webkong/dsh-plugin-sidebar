@@ -36,6 +36,7 @@ export function apply(ctx: { get(name: string): unknown; effect(cb: () => unknow
   const api: Api = {
     'fs.list': async (p) => fsOps.listDir(fs, str(p.path)),
     'fs.read': async (p) => fsOps.readText(fs, str(p.path)),
+    'fs.write': async (p) => fsOps.writeText(fs, str(p.path), str(p.content)),
     'fs.search': async (p) => {
       const mode = p.mode === 'content' ? 'content' : 'name'
       const root = str(p.path)

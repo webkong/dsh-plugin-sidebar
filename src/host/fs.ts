@@ -8,6 +8,7 @@ export interface FsService {
   stat(target: { targetKey: string; displayPath: string }): Promise<{ type: string; size?: number } | undefined>
   readText(target: { targetKey: string; displayPath: string }): Promise<string>
   readBytes(target: { targetKey: string; displayPath: string }, signal: undefined, maxBytes: number): Promise<Uint8Array>
+  writeText(target: { targetKey: string; displayPath: string }, content: string): Promise<unknown>
 }
 
 /** 目录条目（wire 形状） */
@@ -54,4 +55,12 @@ export async function readText(fs: FsService | undefined, path: string): Promise
   } catch {
     return { ok: true, kind: 'binary', content: '' }
   }
+}
+
+/** 写文本（预览编辑保存；尊重挂载 fs 服务的沙箱/观测策略） */
+export async function writeText(fs: FsService | undefined, path: string, content: string): Promise<{ ok: true }> {
+  if (!fs) throw new Error('fs 服务不可用')
+  const target = await fs.resolve(path)
+  await fs.writeText(target, content)
+  return { ok: true }
 }

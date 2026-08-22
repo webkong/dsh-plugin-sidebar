@@ -107,6 +107,7 @@ export function apply(ctx: ClientCtx): void {
       (props: Record<string, unknown> & { sessionId?: string }) => React.createElement(FilePreviewView, {
         sessionId: props.sessionId,
         t,
+        host,
       }),
     ),
   )
