@@ -8,6 +8,7 @@
   --spr-hover: var(--dsw-alias-interactive-bg-hover, rgba(0,0,0,.05));
   --spr-green: var(--dsw-alias-state-success-primary, #16a34a);
   --spr-red: var(--dsw-alias-state-error-primary, #dc2626);
+  --spr-amber: var(--dsw-alias-state-warn-primary, #d97706);
   --spr-blue: var(--dsw-alias-state-business-primary, #3964fe);
   box-sizing: border-box;
   display: flex;
@@ -69,9 +70,10 @@
 .spr-fileRow { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 6px; cursor: pointer; color: var(--spr-fg-2); white-space: nowrap; }
 .spr-fileRow:hover { background: var(--spr-hover); color: var(--spr-fg); }
 .spr-fileBadge { flex: none; font-size: 9px; font-weight: 800; line-height: 12px; min-width: 14px; text-align: center; padding: 0 2px; border-radius: 3px; }
-.spr-fileBadge[data-stage='M'] { background: color-mix(in srgb, var(--spr-blue) 16%, transparent); color: var(--spr-blue); }
+.spr-fileBadge[data-stage='M'] { background: color-mix(in srgb, var(--spr-amber) 16%, transparent); color: var(--spr-amber); }
 .spr-fileBadge[data-stage='A'] { background: color-mix(in srgb, var(--spr-green) 16%, transparent); color: var(--spr-green); }
 .spr-fileBadge[data-stage='D'] { background: color-mix(in srgb, var(--spr-red) 16%, transparent); color: var(--spr-red); }
+.spr-fileBadge[data-stage='R'] { background: color-mix(in srgb, var(--spr-green) 16%, transparent); color: var(--spr-green); }
 .spr-fileBadge[data-stage='?'] { background: var(--spr-hover); color: var(--spr-fg-2); }
 .spr-fileName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .spr-fileActions { display: none; align-items: center; gap: 2px; flex: none; }
@@ -84,12 +86,12 @@
 .spr-commitBtn:hover { filter: brightness(1.08); }
 .spr-commitBtn[disabled] { opacity: .45; cursor: default; filter: none; }
 /* 提交历史（VSCode 源码控制风格）：时间线节点 + 竖线 + 可展开文件列表 */
-.spr-logRow { position: relative; padding-left: 10px; margin: 0 4px; }
-.spr-logRow::before { content: ''; position: absolute; left: 4px; top: 0; bottom: 0; width: 1px; background: color-mix(in srgb, var(--spr-blue) 45%, transparent); }
+.spr-logRow { position: relative; padding-left: 20px; margin: 0 4px; }
+.spr-logRow::before { content: ''; position: absolute; left: 13px; top: 0; bottom: 0; width: 1px; background: color-mix(in srgb, var(--spr-blue) 45%, transparent); }
 .spr-logRow[data-last='true']::before { bottom: auto; height: 12px; }
 .spr-logTop { display: flex; align-items: center; gap: 5px; min-width: 0; padding: 4px 6px 4px 2px; border-radius: 6px; cursor: pointer; }
 .spr-logTop:hover { background: var(--spr-hover); }
-.spr-logNode { position: absolute; left: 1px; top: 9px; width: 7px; height: 7px; border-radius: 50%; background: color-mix(in srgb, var(--spr-blue) 78%, transparent); box-shadow: 0 0 0 2px var(--spr-hover); z-index: 1; }
+.spr-logNode { position: absolute; left: 10px; top: 9px; width: 7px; height: 7px; border-radius: 50%; background: color-mix(in srgb, var(--spr-blue) 78%, transparent); box-shadow: 0 0 0 2px var(--spr-hover); z-index: 1; }
 .spr-logChevron { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; color: var(--spr-fg-3); transition: transform .15s var(--ds-ease-in-out, ease); }
 .spr-logSubject { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--spr-fg); }
 .spr-logRefs { flex: none; display: flex; align-items: center; gap: 3px; max-width: 40%; overflow: hidden; }

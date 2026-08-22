@@ -4,7 +4,7 @@
 import React from 'react'
 import { Icon, Spinner } from '../icons.tsx'
 import { baseName, errMsg } from '../util.ts'
-import { badgeFromXy, badgeTitleKey } from './derive.ts'
+import { badgeFromXy, badgeTitleKey, dirBadge } from './derive.ts'
 import { previewStore } from '../previewStore.ts'
 import type { Translate } from '../i18n.ts'
 import type { HostApi, NameMatch, ContentMatch, SearchResponse } from '../types.ts'
@@ -177,10 +177,10 @@ export function FilesPanel({ cwd, sessionId, host, t }: { cwd: string | undefine
     if (btn && btn.getAttribute('aria-selected') !== 'true') btn.click()
   }
 
-  /** 文件行尾部 git 徽标（仅 git 仓库且该路径有状态时渲染） */
-  const renderGitBadge = (rel: string): React.ReactElement | null => {
+  /** 文件/目录行尾部 git 徽标（仅 git 仓库且有状态时渲染；目录取其下文件聚合状态） */
+  const renderGitBadge = (rel: string, isDir: boolean): React.ReactElement | null => {
     if (!isGit || rel === '') return null
-    const xy = gitMap[rel]
+    const xy = isDir ? dirBadge(gitMap, rel) : gitMap[rel]
     if (!xy) return null
     const badge = badgeFromXy(xy)
     return React.createElement('span', {
@@ -200,7 +200,7 @@ export function FilesPanel({ cwd, sessionId, host, t }: { cwd: string | undefine
             React.createElement(Icon, { name: 'chevron', size: 12 })),
           React.createElement('span', { className: 'spr-rowIcon', 'data-type': 'dir' }, React.createElement(Icon, { name: 'folder', size: 14 })),
           React.createElement('span', { className: 'spr-rowLabel' }, node.name),
-          renderGitBadge(node.rel)),
+          renderGitBadge(node.rel, true)),
         open && loading ? React.createElement('div', { className: 'spr-spinnerWrap', style: { padding: '6px 0' } }, React.createElement(Spinner, { size: 12 })) : null,
         open && node.error ? React.createElement('div', { className: 'spr-empty', style: { padding: '4px 16px', fontSize: 11, textAlign: 'left' } }, node.error) : null,
         children.map((child) => renderNode(child, depth + 1)))
@@ -211,7 +211,7 @@ export function FilesPanel({ cwd, sessionId, host, t }: { cwd: string | undefine
     },
       React.createElement('span', { className: 'spr-rowIcon' }, React.createElement(Icon, { name: 'file', size: 13 })),
       React.createElement('span', { className: 'spr-rowLabel' }, node.name),
-      renderGitBadge(node.rel))
+      renderGitBadge(node.rel, false))
   }
 
   /* 搜索结果视图 */
@@ -238,7 +238,7 @@ export function FilesPanel({ cwd, sessionId, host, t }: { cwd: string | undefine
             React.createElement('span', { className: 'spr-nameIcon', 'data-type': m.isDir ? 'dir' : 'file' },
               React.createElement(Icon, { name: m.isDir ? 'folder' : 'file', size: 13 })),
             React.createElement('span', { className: 'spr-namePath', title: m.path }, m.path),
-            renderGitBadge(m.path))
+            renderGitBadge(m.path, m.isDir))
         }))
     }
     /* content 模式：按文件分组展示 */

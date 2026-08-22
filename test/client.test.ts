@@ -4,7 +4,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { relativeTime, timeLabel, baseName, sessionStatus, pendingLabel } from '../src/client/util.ts'
 import { deriveGroups, deriveSearchRows } from '../src/client/left/derive.ts'
-import { badgeOf, isStaged, isUnstaged, isUntracked } from '../src/client/right/derive.ts'
+import { badgeOf, isStaged, isUnstaged, isUntracked, dirBadge } from '../src/client/right/derive.ts'
 
 // ── util ─────────────────────────────────────────────────────────────
 test('relativeTime 分桶', () => {
@@ -145,6 +145,17 @@ test('badgeOf 索引字母优先', () => {
   assert.equal(badgeOf({ path: 'a', xy: '??' }), '?')
   assert.equal(badgeOf({ path: 'a', xy: 'A ' }), 'A')
   assert.equal(badgeOf({ path: 'a', xy: ' D' }), 'D')
+})
+
+test('dirBadge 目录聚合（子文件状态，优先级 D>M>A>R>U）', () => {
+  const map = { 'docs/readme.md': ' M', 'docs/guide.md': '??', 'src/index.ts': 'A ', 'other.txt': ' M' }
+  assert.equal(dirBadge(map, 'docs'), 'M')       // docs 下有 modified
+  assert.equal(dirBadge(map, 'src'), 'A')        // src 下有 added
+  assert.equal(dirBadge(map, 'nonexistent'), null) // 无更改
+  assert.equal(dirBadge({ 'a/b/x': ' D' }, 'a'), 'D') // 删除优先
+  assert.equal(dirBadge({ 'c/x': '??' }, 'c'), '?')  // 仅未跟踪
+  assert.equal(dirBadge(map, ''), null)          // 根目录不显示
+  assert.equal(dirBadge({ 'sub/file': ' M' }, 's'), null) // 前缀需精确目录边界
 })
 
 test('isStaged / isUnstaged / isUntracked 分类', () => {
