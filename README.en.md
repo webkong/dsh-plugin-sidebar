@@ -41,6 +41,10 @@ Browse every session by workspace on the left (status dots, groups, search, one-
 - **Git panel**: status split into **Staged / Changes** (`--porcelain=v1 -z` NUL parsing), inline stage/unstage/discard, colored diff, commit box, branch switch
 - **Commit history (VSCode Source Control style)**: timeline dots + connector line, one-line-truncated message; expand to reveal author · date + that commit's **changed-file list** (M/A/D colored letters), files lazy-loaded on demand
 
+![Right sidebar file explorer + file preview tab](assets/file-explorer.png)
+
+![Right Git panel + VSCode-style commit history](assets/git-panel.png)
+
 ### 🔀 Move session to folder
 - Copy semantics (fork): the source session stays; a new session is created in the target workspace inheriting **all completed history**, auto-opened after creation
 - Uses the official `agents.create(seed + meta.cwd)` path; the new session is an **agent** (lifecycle owned by the agent registry, not removed when the plugin stops)
