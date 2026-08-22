@@ -39,12 +39,14 @@ Browse every session by workspace on the left (status dots, groups, search, one-
 ### 📁 Right sidebar · file browsing + Git panel
 - **Session-header toggle** (next to the session log download); **toggle state is remembered per session** — a session you opened the panel in stays open after switching away and back
 - **File explorer**: lazy directory tree (expand to load children), name search, content search (file/line/text), **directory git-status aggregation badges** (highest priority D>M>A>R>U of changed files underneath)
-- **File preview tab**: a **File preview** tab after the main region's **Conversation / Trajectory** tabs; clicking a file in the right sidebar auto-switches there to preview (512 KB text truncation / binary notice)
+- **File preview tab (CodeMirror editing)**: a **File preview** tab after the main region's **Conversation / Trajectory** tabs; clicking a file in the right sidebar auto-switches there. Text files render with **CodeMirror 6** — **syntax highlighting** (language auto-picked by extension) + **editable** + **save back to disk** (`●` unsaved marker + save button, head pinned so it's always visible); binary/large files show a notice
 - **Git panel**: status split into **Staged / Changes** (`--porcelain=v1 -z` NUL parsing), colored diff, commit box, branch switch
 - **Bulk actions (VSCode Source Control style, on section-header hover)**: `Stage all`(+) / `Unstage all`(−) / `Discard all`(undo); per-file row hover: diff(file) + stage(+)/unstage(−) + discard(undo)
 - **Commit history (VSCode Source Control style)**: timeline dots + connector line, one-line-truncated message; expand to reveal author · date + that commit's **changed-file list** (M/A/D colored letters), files lazy-loaded on demand
 
 ![Right sidebar file explorer + file preview tab](assets/file-explorer.png)
+
+![File preview: editing README in CodeMirror (syntax highlighting + save)](assets/preview-editor.png)
 
 ![Right Git panel + VSCode-style commit history](assets/git-panel.png)
 
