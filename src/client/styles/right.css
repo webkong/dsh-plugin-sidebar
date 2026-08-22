@@ -65,6 +65,8 @@
 .spr-sectionChevron { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; color: var(--spr-fg-3); transition: transform .15s var(--ds-ease-in-out, ease); }
 .spr-sectionTitle { flex: 1; min-width: 0; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
 .spr-sectionCount { flex: none; font-size: 10px; font-weight: 600; color: var(--spr-fg-3); background: var(--spr-hover); border-radius: 8px; padding: 1px 7px; }
+.spr-sectionActions { display: none; align-items: center; gap: 2px; flex: none; }
+.spr-sectionHead:hover .spr-sectionActions { display: inline-flex; }
 .spr-sectionBody { display: flex; flex-direction: column; }
 .spr-noChanges { padding: 2px 24px; font-size: 12px; color: var(--spr-fg-3); }
 .spr-fileRow { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 6px; cursor: pointer; color: var(--spr-fg-2); white-space: nowrap; }

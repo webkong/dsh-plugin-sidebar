@@ -150,9 +150,9 @@ export async function unstage(shell: ShellService | undefined, cwd: string, path
   await runGit(shell, cwd, ['reset', '-q', ...(path !== undefined ? ['--', path] : [])])
 }
 
-/** 放弃单路径工作区更改（索引不动） */
-export async function discard(shell: ShellService | undefined, cwd: string, path: string): Promise<void> {
-  await runGit(shell, cwd, ['checkout', '--', path])
+/** 放弃工作区更改（单路径，或全部已跟踪文件 path 省略；未跟踪文件不适用） */
+export async function discard(shell: ShellService | undefined, cwd: string, path?: string): Promise<void> {
+  await runGit(shell, cwd, ['checkout', '--', ...(path !== undefined ? [path] : ['.'])])
 }
 
 /** 提交暂存内容（使用用户全局 git 身份） */

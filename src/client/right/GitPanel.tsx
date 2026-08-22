@@ -2,7 +2,7 @@
 // 三个 section（已暂存 / 更改 / 历史）均可折叠；提交历史行带 hash、标题与 refs（分支/标签）徽章。
 // 数据经 HostApi 获取。
 import React from 'react'
-import { Icon, Spinner } from '../icons.tsx'
+import { Icon, Spinner, type IconName } from '../icons.tsx'
 import { timeLabel, errMsg } from '../util.ts'
 import { badgeOf, isStaged, isUnstaged, isUntracked } from './derive.ts'
 import type { Translate } from '../i18n.ts'
@@ -39,15 +39,16 @@ function parseRefs(refs: string): RefBadge[] {
   return out
 }
 
-/** 可折叠 section：标题 + 计数 + chevron 折叠按钮 */
+/** 可折叠 section：标题 + 计数 + chevron 折叠按钮 + hover 批量操作 */
 function CollapsibleSection(props: {
   title: string
   count: number
   collapsed: boolean
   onToggle: () => void
   children: React.ReactElement | null
+  actions?: React.ReactNode
 }): React.ReactElement {
-  const { title, count, collapsed, onToggle, children } = props
+  const { title, count, collapsed, onToggle, children, actions } = props
   return React.createElement('div', { className: 'spr-section' },
     React.createElement('div', { className: 'spr-sectionHead', onClick: onToggle },
       React.createElement('span', {
@@ -55,7 +56,8 @@ function CollapsibleSection(props: {
         style: { transform: collapsed ? 'rotate(-90deg)' : 'none' },
       }, React.createElement(Icon, { name: 'chevron', size: 12 })),
       React.createElement('span', { className: 'spr-sectionTitle' }, title),
-      React.createElement('span', { className: 'spr-sectionCount' }, String(count))),
+      React.createElement('span', { className: 'spr-sectionCount' }, String(count)),
+      actions ? React.createElement('div', { className: 'spr-sectionActions', onClick: (e: React.MouseEvent) => e.stopPropagation() }, actions) : null),
     collapsed ? null : React.createElement('div', { className: 'spr-sectionBody' }, children))
 }
 
@@ -161,22 +163,45 @@ export function GitPanel({ cwd, host, t }: { cwd: string | undefined; host: Host
     } catch (err) { setError(errMsg(err)) }
   }
 
+  /* 批量操作（section 头按钮，VSCode 源码控制风格）：暂存全部 / 取消暂存全部 / 放弃全部 */
+  const busyAll = busyPath === '*all*'
+  const runBulk = async (method: string, args: Record<string, unknown>): Promise<void> => {
+    setBusyPath('*all*')
+    try {
+      await run(method, args)
+      await refresh()
+    } catch (err) { setError(errMsg(err)) } finally { setBusyPath(null) }
+  }
+  const stageAll = () => runBulk('git.stage', { cwd })
+  const unstageAll = () => runBulk('git.unstage', { cwd })
+  const discardAll = () => runBulk('git.discard', { cwd })
+
+  /* section 头批量按钮（hover 显示） */
+  const bulkBtn = (title: string, icon: IconName, onClick: () => void): React.ReactElement =>
+    React.createElement('button', { type: 'button', className: 'spr-iconBtn', title, disabled: busyAll, onClick },
+      React.createElement(Icon, { name: icon, size: 12 }))
+
+  const stageAllBtn = bulkBtn(t('stageAll'), 'plus', () => { void stageAll() })
+  const unstageAllBtn = bulkBtn(t('unstageAll'), 'minus', () => { void unstageAll() })
+  const discardAllBtn = bulkBtn(t('discardAll'), 'undo', () => { void discardAll() })
+
   const stagedEntries = status && status.isRepo ? status.entries.filter(isStaged) : []
   const unstagedEntries = status && status.isRepo ? status.entries.filter(isUnstaged) : []
 
   const renderFileRow = (entry: GitStatusEntry, staged: boolean): React.ReactElement => {
     const badge = badgeOf(entry)
     const busy = busyPath === entry.path
+    const untracked = isUntracked(entry)
     return React.createElement('div', { key: entry.path, className: 'spr-fileRow' },
       React.createElement('span', { className: 'spr-fileBadge', 'data-stage': badge }, badge),
       React.createElement('span', { className: 'spr-fileName', title: entry.path }, entry.path),
       React.createElement('div', { className: 'spr-fileActions' },
-        React.createElement('button', { type: 'button', className: 'spr-iconBtn', title: staged ? t('unstage') : t('stage'), disabled: busy, onClick: () => { void toggleStage(entry, staged) } },
-          React.createElement(Icon, { name: staged ? 'close' : 'check', size: 12 })),
-        isUntracked(entry) ? null : React.createElement('button', { type: 'button', className: 'spr-iconBtn', title: t('diff.' + (staged ? 'staged' : 'worktree')), disabled: busy, onClick: () => { void viewDiff(entry, staged) } },
+        untracked ? null : React.createElement('button', { type: 'button', className: 'spr-iconBtn', title: t('diff.' + (staged ? 'staged' : 'worktree')), disabled: busy, onClick: () => { void viewDiff(entry, staged) } },
           React.createElement(Icon, { name: 'file', size: 12 })),
-        isUntracked(entry) ? null : React.createElement('button', { type: 'button', className: 'spr-iconBtn', title: t('discard'), disabled: busy, onClick: () => { void discard(entry) } },
-          React.createElement(Icon, { name: 'close', size: 12 }))))
+        React.createElement('button', { type: 'button', className: 'spr-iconBtn', title: staged ? t('unstage') : t('stage'), disabled: busy, onClick: () => { void toggleStage(entry, staged) } },
+          React.createElement(Icon, { name: staged ? 'minus' : 'plus', size: 12 })),
+        untracked ? null : React.createElement('button', { type: 'button', className: 'spr-iconBtn', title: t('discard'), disabled: busy, onClick: () => { void discard(entry) } },
+          React.createElement(Icon, { name: untracked ? 'trash' : 'undo', size: 12 }))))
   }
 
   const renderDiff = (d: DiffState): React.ReactElement => {
@@ -267,6 +292,8 @@ export function GitPanel({ cwd, host, t }: { cwd: string | undefined; host: Host
               React.createElement(CollapsibleSection, {
                 title: t('staged'), count: stagedEntries.length,
                 collapsed: collapsed.staged, onToggle: () => toggleSection('staged'),
+                actions: React.createElement(React.Fragment, null,
+                  unstageAllBtn, discardAllBtn),
                 children: stagedEntries.length === 0
                   ? React.createElement('div', { className: 'spr-noChanges' }, t('noChanges'))
                   : React.createElement(React.Fragment, null, stagedEntries.map((e) => renderFileRow(e, true))),
@@ -274,6 +301,8 @@ export function GitPanel({ cwd, host, t }: { cwd: string | undefined; host: Host
               React.createElement(CollapsibleSection, {
                 title: t('changes'), count: unstagedEntries.length,
                 collapsed: collapsed.changes, onToggle: () => toggleSection('changes'),
+                actions: React.createElement(React.Fragment, null,
+                  stageAllBtn, discardAllBtn),
                 children: unstagedEntries.length === 0
                   ? React.createElement('div', { className: 'spr-noChanges' }, t('noChanges'))
                   : React.createElement(React.Fragment, null, unstagedEntries.map((e) => renderFileRow(e, false))),
