@@ -225,7 +225,7 @@ export function GitPanel({ cwd, host, t }: { cwd: string | undefined; host: Host
         React.createElement('span', { className: 'spr-logNode' }),
         React.createElement('span', { className: 'spr-logChevron', style: { transform: open ? 'rotate(90deg)' : 'none' } },
           React.createElement(Icon, { name: 'chevron', size: 12 })),
-        React.createElement('span', { className: 'spr-logSubject' }, row.subject),
+        React.createElement('span', { className: 'spr-logSubject', title: row.subject }, row.subject),
         refs.length > 0
           ? React.createElement('span', { className: 'spr-logRefs' },
               refs.map((r) => React.createElement('span', { key: r.label, className: 'spr-logRef', 'data-kind': r.kind }, r.label)))

@@ -84,12 +84,12 @@
 .spr-commitBtn:hover { filter: brightness(1.08); }
 .spr-commitBtn[disabled] { opacity: .45; cursor: default; filter: none; }
 /* 提交历史（VSCode 源码控制风格）：时间线节点 + 竖线 + 可展开文件列表 */
-.spr-logRow { position: relative; padding-left: 16px; margin: 0 4px; }
-.spr-logRow::before { content: ''; position: absolute; left: 9px; top: 0; bottom: 0; width: 1px; background: color-mix(in srgb, var(--spr-fg) 12%, transparent); }
+.spr-logRow { position: relative; padding-left: 28px; margin: 0 4px; }
+.spr-logRow::before { content: ''; position: absolute; left: 5px; top: 0; bottom: 0; width: 1px; background: color-mix(in srgb, var(--spr-fg) 22%, transparent); }
 .spr-logRow[data-last='true']::before { bottom: auto; height: 12px; }
-.spr-logTop { display: flex; align-items: center; gap: 5px; min-width: 0; padding: 4px 8px; border-radius: 6px; cursor: pointer; position: relative; }
+.spr-logTop { display: flex; align-items: center; gap: 5px; min-width: 0; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
 .spr-logTop:hover { background: var(--spr-hover); }
-.spr-logNode { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--spr-blue); box-shadow: 0 0 0 2px var(--spr-hover); position: relative; z-index: 1; }
+.spr-logNode { position: absolute; left: 1px; top: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--spr-blue); box-shadow: 0 0 0 2px var(--spr-hover); z-index: 1; }
 .spr-logChevron { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; color: var(--spr-fg-3); transition: transform .15s var(--ds-ease-in-out, ease); }
 .spr-logSubject { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--spr-fg); }
 .spr-logRefs { flex: none; display: flex; align-items: center; gap: 3px; max-width: 40%; overflow: hidden; }
