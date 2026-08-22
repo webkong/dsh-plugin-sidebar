@@ -32,7 +32,7 @@ export function RightPanel(props: RightPanelProps): React.ReactElement {
       React.createElement('button', { type: 'button', className: 'spr-iconBtn', title: t('close'), 'aria-label': t('close'), onClick: () => { markDetailsClosed(sessionId); closeDetails() } },
         React.createElement(Icon, { name: 'close', size: 15 }))),
     tab === 'files'
-      ? React.createElement(FilesPanel, { cwd, host, t })
+      ? React.createElement(FilesPanel, { cwd, sessionId, host, t })
       : React.createElement(GitPanel, { cwd, host, t }))
 }
 

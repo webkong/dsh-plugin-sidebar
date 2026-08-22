@@ -1,8 +1,9 @@
-// 样式聚合：按组件域拆分（left.css / right.css），运行期合并注入一个 style 标签。
+// 样式聚合：按组件域拆分（left.css / right.css / preview.css），运行期合并注入一个 style 标签。
 import leftCss from './left.css'
 import rightCss from './right.css'
+import previewCss from './preview.css'
 
-export const CSS = leftCss + '\n' + rightCss
+export const CSS = leftCss + '\n' + rightCss + '\n' + previewCss
 
 const STYLE_ID = 'dsh-plugin-sidebar/panel.css'
 

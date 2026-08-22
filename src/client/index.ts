@@ -11,6 +11,7 @@ import { NS, zh, en } from './i18n.ts'
 import { call } from './api.ts'
 import { WorkspaceBrowser, type LeftInject, type WorkspaceBrowserProps } from './left/WorkspaceBrowser.tsx'
 import { RightPanel, RightToggle, type RightPanelProps } from './right/RightPanel.tsx'
+import { FilePreviewView } from './preview/PreviewView.tsx'
 import type { Translate } from './i18n.ts'
 
 export { NS, zh, en } from './i18n.ts'
@@ -89,6 +90,23 @@ export function apply(ctx: ClientCtx): void {
         sessionId: props.sessionId,
         useSessions: props.useSessions,
         layout,
+      }),
+    ),
+  )
+
+  // 主区域「文件预览」tab（对话 / 轨迹之后）：右侧栏点击文件时预览出现在此
+  slots.inject('conversation.view', () =>
+    slots.register(
+      {
+        name: 'conversation.view',
+        id: 'file-preview',
+        order: 20,
+        locale: NS,
+        label: () => t('view.preview'),
+      },
+      (props: Record<string, unknown> & { sessionId?: string }) => React.createElement(FilePreviewView, {
+        sessionId: props.sessionId,
+        t,
       }),
     ),
   )

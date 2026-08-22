@@ -91,6 +91,8 @@ export const zh = {
   'status.untracked': '未跟踪',
   'search.noResults': '无匹配结果',
   'search.tooMany': '结果过多，请缩小范围',
+  'view.preview': '文件预览',
+  'preview.none': '点击左侧文件查看预览',
 } as const
 
 export const en: Record<keyof typeof zh, string> = {
@@ -181,6 +183,8 @@ export const en: Record<keyof typeof zh, string> = {
   'status.untracked': 'Untracked',
   'search.noResults': 'No matches',
   'search.tooMany': 'Too many results, narrow the query',
+  'view.preview': 'File preview',
+  'preview.none': 'Click a file to preview',
 }
 
 export type DictKey = keyof typeof zh

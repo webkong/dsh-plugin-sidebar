@@ -1,10 +1,11 @@
-// 文件浏览器：懒加载目录树（展开目录时才向 Host 拉取子列表）+ 底部文本预览（512KB 截断 / 二进制提示）
-// + 搜索（Names 按文件名 / Contents 按内容两种模式）+ 文件行尾部 git 状态徽标（仅 git 仓库）。
+// 文件浏览器：懒加载目录树（展开目录时才向 Host 拉取子列表）+ 搜索（Names 按文件名 / Contents 按内容）
+// + 文件行尾部 git 状态徽标（仅 git 仓库）。点击文件：预览写入预览 store，主区域「文件预览」tab 展示并自动切换。
 // 数据经 HostApi 获取。
 import React from 'react'
 import { Icon, Spinner } from '../icons.tsx'
 import { baseName, errMsg } from '../util.ts'
 import { badgeFromXy, badgeTitleKey } from './derive.ts'
+import { previewStore } from '../previewStore.ts'
 import type { Translate } from '../i18n.ts'
 import type { HostApi, NameMatch, ContentMatch, SearchResponse } from '../types.ts'
 
@@ -27,21 +28,13 @@ interface TreeNode {
   error?: string
 }
 
-interface PreviewState {
-  path: string
-  name: string
-  kind: 'loading' | 'text' | 'binary' | 'error'
-  content: string
-  truncated?: boolean
-}
-
 type SearchMode = 'name' | 'content'
 
-export function FilesPanel({ cwd, host, t }: { cwd: string | undefined; host: HostApi; t: Translate }): React.ReactElement {
+export function FilesPanel({ cwd, sessionId, host, t }: { cwd: string | undefined; sessionId: string; host: HostApi; t: Translate }): React.ReactElement {
   const [root, setRoot] = React.useState<TreeNode | null>(null)
   const [expanded, setExpanded] = React.useState<Set<string>>(() => new Set())
   const [loadingPaths, setLoadingPaths] = React.useState<Set<string>>(() => new Set())
-  const [preview, setPreview] = React.useState<PreviewState | null>(null)
+  const [selected, setSelected] = React.useState<string | null>(null)
   const [loadingRoot, setLoadingRoot] = React.useState(false)
 
   /* ── git 状态映射：path(相对) → xy ── */
@@ -130,14 +123,17 @@ export function FilesPanel({ cwd, host, t }: { cwd: string | undefined; host: Ho
   }
 
   const openFile = async (path: string, name: string): Promise<void> => {
-    setPreview({ path, name, kind: 'loading', content: '' })
+    setSelected(path)
+    previewStore.set(sessionId, { path, name, kind: 'loading', content: '' })
     try {
       const res = await host.call('fs.read', { path })
       if (!res || !res.ok) throw new Error((res && res.error) || 'read failed')
-      setPreview({ path, name, kind: res.kind === 'text' ? 'text' : res.kind, content: res.content || '', truncated: res.truncated })
+      previewStore.set(sessionId, { path, name, kind: res.kind === 'text' ? 'text' : res.kind, content: res.content || '', truncated: res.truncated })
     } catch (err) {
-      setPreview({ path, name, kind: 'error', content: errMsg(err) })
+      previewStore.set(sessionId, { path, name, kind: 'error', content: errMsg(err) })
     }
+    // 切到主区域「文件预览」tab（DOM 模拟点击 header 的该 tab 按钮）
+    activatePreviewTab(t('view.preview'))
   }
 
   /* 执行搜索（防抖；序号守卫丢弃过期结果） */
@@ -173,6 +169,14 @@ export function FilesPanel({ cwd, host, t }: { cwd: string | undefined; host: Ho
     setSearchError(null)
   }
 
+  /** 自动切换到主区域「文件预览」tab：DOM 点击 header 里 label 匹配的 tab 按钮。
+   * conversation.view 的激活 API 未公开（内部 store），故按 text 定位。 */
+  const activatePreviewTab = (label: string): void => {
+    const btn = Array.from(document.querySelectorAll<HTMLButtonElement>('button[role="tab"]'))
+      .find((b) => b.textContent === label)
+    if (btn && btn.getAttribute('aria-selected') !== 'true') btn.click()
+  }
+
   /** 文件行尾部 git 徽标（仅 git 仓库且该路径有状态时渲染） */
   const renderGitBadge = (rel: string): React.ReactElement | null => {
     if (!isGit || rel === '') return null
@@ -202,7 +206,7 @@ export function FilesPanel({ cwd, host, t }: { cwd: string | undefined; host: Ho
         children.map((child) => renderNode(child, depth + 1)))
     }
     return React.createElement('div', {
-      key: node.path, className: 'spr-row', 'data-selected': preview && preview.path === node.path ? 'true' : 'false',
+      key: node.path, className: 'spr-row', 'data-selected': selected === node.path ? 'true' : 'false',
       style: { paddingLeft: 8 + depth * 14 + 22 }, onClick: () => { void openFile(node.path, node.name) },
     },
       React.createElement('span', { className: 'spr-rowIcon' }, React.createElement(Icon, { name: 'file', size: 13 })),
@@ -293,22 +297,7 @@ export function FilesPanel({ cwd, host, t }: { cwd: string | undefined; host: Ho
               ? React.createElement('div', { className: 'spr-empty' }, t('empty.files'))
               : root && root.error
                 ? React.createElement('div', { className: 'spr-empty' }, root.error)
-                : root ? renderNode(root, 0) : null),
-    /* 预览 */
-    preview && React.createElement('div', { className: 'spr-preview' },
-      React.createElement('div', { className: 'spr-previewHead' },
-        React.createElement('span', { className: 'spr-previewName' }, preview.name),
-        React.createElement('button', { type: 'button', className: 'spr-iconBtn', title: t('close'), onClick: () => setPreview(null) },
-          React.createElement(Icon, { name: 'close', size: 13 }))),
-      preview.kind === 'loading'
-        ? React.createElement('div', { className: 'spr-spinnerWrap' }, React.createElement(Spinner, { size: 14 }))
-        : preview.kind === 'binary'
-          ? React.createElement('div', { className: 'spr-previewNotice' }, t('binary'))
-          : preview.kind === 'error'
-            ? React.createElement('div', { className: 'spr-previewNotice' }, preview.content)
-            : React.createElement(React.Fragment, null,
-                preview.truncated ? React.createElement('div', { className: 'spr-previewNotice' }, t('tooLarge')) : null,
-                React.createElement('pre', { className: 'spr-previewBody' }, preview.content))))
+                : root ? renderNode(root, 0) : null))
 }
 
 /** 拼接 cwd 与相对路径 */
