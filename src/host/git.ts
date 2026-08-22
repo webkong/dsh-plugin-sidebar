@@ -42,6 +42,12 @@ export interface GitBranchesResult {
   names: string[]
 }
 
+/** 一次提交改动的文件（name-status 解析） */
+export interface GitLogFile {
+  status: string
+  path: string
+}
+
 /**
  * 运行一条 git 命令；返回 stdout。非零退出抛错（stderr 文本作为 message）。
  * 每条命令都在独立的 shell 调用中执行（`git <args>`，workdir 由 executor 设定），
@@ -169,6 +175,29 @@ export async function branches(shell: ShellService | undefined, cwd: string): Pr
   const raw = await runGit(shell, cwd, ['for-each-ref', '--format=%(refname:short)', 'refs/heads'])
   const names = raw.split('\n').filter((l) => l !== '')
   return { current, names: names.includes(current) ? names : [current, ...names] }
+}
+
+/** 解析 `git log/ show --name-status` 输出：每行 `XY\tpath` 或 `R100\told\tnew` 或 `C100\told\tnew`。 */
+export function parseNameStatus(output: string): GitLogFile[] {
+  const files: GitLogFile[] = []
+  for (const line of output.split('\n')) {
+    const trimmed = line.trim()
+    if (trimmed === '') continue
+    const parts = trimmed.split('\t')
+    if (parts.length < 2) continue
+    const status = parts[0]
+    if (status.length < 1) continue
+    // 重命名/复制条目有三个字段：XY\told\tnew，取目标路径
+    const path = (status[0] === 'R' || status[0] === 'C') ? (parts[2] ?? parts[1]) : parts[1]
+    files.push({ status: status[0], path })
+  }
+  return files
+}
+
+/** 某次提交改动的文件列表（供历史条目展开时按需加载） */
+export async function logFiles(shell: ShellService | undefined, cwd: string, hash: string): Promise<GitLogFile[]> {
+  const raw = await runGit(shell, cwd, ['show', '--name-status', '--format=', '--no-color', hash])
+  return parseNameStatus(raw)
 }
 
 /** 切换分支 */

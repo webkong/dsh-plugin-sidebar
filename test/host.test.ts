@@ -3,7 +3,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { isLoopback, shq, shellJoin } from '../src/host/http.ts'
-import { parsePorcelainZ, parseLogLines, isGitRepo, status, diff, branches } from '../src/host/git.ts'
+import { parsePorcelainZ, parseLogLines, parseNameStatus, isGitRepo, status, diff, branches } from '../src/host/git.ts'
 
 // ── http ────────────────────────────────────────────────────────────
 test('isLoopback 识别回环地址', () => {
@@ -69,6 +69,20 @@ test('parseLogLines 缺字段行跳过、空行跳过', () => {
   assert.equal(rows[0].subject, 'subject')
   assert.equal(rows[0].author, '')
   assert.equal(rows[0].refs, '')
+})
+
+test('parseNameStatus 解析 name-status 输出（普通/重命名/空）', () => {
+  const out = 'M\tsrc/index.ts\nA\tREADME.md\nD\told.txt\nR100\told.ts\tnew.ts\nC100\tother.ts\tcopy.ts\n\n'
+  const files = parseNameStatus(out)
+  assert.deepEqual(files, [
+    { status: 'M', path: 'src/index.ts' },
+    { status: 'A', path: 'README.md' },
+    { status: 'D', path: 'old.txt' },
+    { status: 'R', path: 'new.ts' },
+    { status: 'C', path: 'copy.ts' },
+  ])
+  assert.deepEqual(parseNameStatus('\n\n'), [])
+  assert.deepEqual(parseNameStatus('M\tfile.txt'), [{ status: 'M', path: 'file.txt' }])
 })
 
 // ── git 命令层（mock shell）─────────────────────────────────────────

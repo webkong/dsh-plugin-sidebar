@@ -83,18 +83,27 @@
 .spr-commitBtn { cursor: pointer; height: 28px; border: none; border-radius: 8px; background: var(--spr-blue); color: #fff; font-size: 12px; font-weight: 700; padding: 0 14px; align-self: flex-end; }
 .spr-commitBtn:hover { filter: brightness(1.08); }
 .spr-commitBtn[disabled] { opacity: .45; cursor: default; filter: none; }
-/* 提交历史行：hash + 标题 + refs 徽章 + meta */
-.spr-logRow { display: flex; flex-direction: column; gap: 1px; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
-.spr-logRow:hover { background: var(--spr-hover); }
-.spr-logTop { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.spr-logHash { font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 11px; color: var(--spr-fg-3); flex: none; }
-.spr-logSubject { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 13px; color: var(--spr-fg); }
+/* 提交历史（VSCode 源码控制风格）：时间线节点 + 竖线 + 可展开文件列表 */
+.spr-logRow { position: relative; padding-left: 16px; margin: 0 4px; }
+.spr-logRow::before { content: ''; position: absolute; left: 9px; top: 0; bottom: 0; width: 1px; background: color-mix(in srgb, var(--spr-fg) 12%, transparent); }
+.spr-logRow[data-last='true']::before { bottom: auto; height: 12px; }
+.spr-logTop { display: flex; align-items: center; gap: 5px; min-width: 0; padding: 4px 8px; border-radius: 6px; cursor: pointer; position: relative; }
+.spr-logTop:hover { background: var(--spr-hover); }
+.spr-logNode { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--spr-blue); box-shadow: 0 0 0 2px var(--spr-hover); position: relative; z-index: 1; }
+.spr-logChevron { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; color: var(--spr-fg-3); transition: transform .15s var(--ds-ease-in-out, ease); }
+.spr-logSubject { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--spr-fg); }
 .spr-logRefs { flex: none; display: flex; align-items: center; gap: 3px; max-width: 40%; overflow: hidden; }
 .spr-logRef { flex: none; font-size: 9px; font-weight: 600; line-height: 12px; padding: 0 5px; border-radius: 3px; white-space: nowrap; }
 .spr-logRef[data-kind='branch'] { background: color-mix(in srgb, var(--spr-blue) 16%, transparent); color: var(--spr-blue); }
 .spr-logRef[data-kind='tag'] { background: color-mix(in srgb, var(--spr-green) 16%, transparent); color: var(--spr-green); }
 .spr-logRef[data-kind='head'] { background: color-mix(in srgb, var(--spr-blue) 16%, transparent); color: var(--spr-blue); }
-.spr-logMeta { font-size: 11px; color: var(--spr-fg-3); padding-left: 18px; }
+.spr-logDetail { padding: 0 8px 6px 32px; }
+.spr-logMeta { font-size: 11px; color: var(--spr-fg-3); }
+.spr-logFiles { display: flex; flex-direction: column; gap: 1px; margin-top: 3px; }
+.spr-logFile { display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 6px; border-radius: 5px; color: var(--spr-fg-2); white-space: nowrap; }
+.spr-logFile:hover { background: var(--spr-hover); }
+.spr-logFile .spr-fileName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.spr-logLoading { padding: 2px 0 4px; }
 .spr-diff { border-top: 1px solid var(--spr-border); flex: none; max-height: 50%; min-height: 0; display: flex; flex-direction: column; }
 .spr-diffHead { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-bottom: 1px solid var(--spr-border); color: var(--spr-fg-2); font-size: 11px; font-weight: 600; }
 .spr-diffHead .spr-diffName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }

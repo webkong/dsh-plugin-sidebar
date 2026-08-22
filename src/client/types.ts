@@ -69,6 +69,12 @@ export interface GitLogEntry {
   refs: string
 }
 
+/** 一次提交改动的文件（Host wire 形状） */
+export interface GitLogFile {
+  status: string
+  path: string
+}
+
 /** 分支列表（Host wire 形状） */
 export interface GitBranchesResult {
   current: string

@@ -6,7 +6,7 @@ import { Icon, Spinner } from '../icons.tsx'
 import { timeLabel, errMsg } from '../util.ts'
 import { badgeOf, isStaged, isUnstaged, isUntracked } from './derive.ts'
 import type { Translate } from '../i18n.ts'
-import type { HostApi, GitStatusResult, GitStatusEntry, GitLogEntry, GitBranchesResult } from '../types.ts'
+import type { HostApi, GitStatusResult, GitStatusEntry, GitLogEntry, GitLogFile, GitBranchesResult } from '../types.ts'
 
 interface DiffState {
   name: string
@@ -69,6 +69,9 @@ export function GitPanel({ cwd, host, t }: { cwd: string | undefined; host: Host
   const [diff, setDiff] = React.useState<DiffState | null>(null)
   const [branches, setBranches] = React.useState<GitBranchesResult | null>(null)
   const [busyPath, setBusyPath] = React.useState<string | null>(null)
+  /* 历史展开：每条提交的可展开状态 + 懒加载的文件列表（'loading' = 加载中） */
+  const [expandedLog, setExpandedLog] = React.useState<Set<string>>(() => new Set())
+  const [logFiles, setLogFiles] = React.useState<Record<string, GitLogFile[] | 'loading'>>({})
   /* 三个 section 的折叠状态 */
   const [collapsed, setCollapsed] = React.useState<{ staged: boolean; changes: boolean; history: boolean }>({
     staged: false,
@@ -191,20 +194,53 @@ export function GitPanel({ cwd, host, t }: { cwd: string | undefined; host: Host
         })))
   }
 
-  /* 提交历史行：hash + 标题 + refs 徽章（分支蓝 / 标签紫 / HEAD 绿），meta 作者·时间 */
-  const renderLogRow = (row: GitLogEntry): React.ReactElement => {
+  /* 展开/收起某次提交；首次展开时按需懒加载该提交改动的文件 */
+  const toggleLog = (hash: string): void => {
+    setExpandedLog((prev) => {
+      const next = new Set(prev)
+      if (next.has(hash)) {
+        next.delete(hash)
+        return next
+      }
+      next.add(hash)
+      if (!(hash in logFiles)) {
+        setLogFiles((lf) => ({ ...lf, [hash]: 'loading' }))
+        host.call('git.logFiles', { cwd, hash }).then((res) => {
+          setLogFiles((lf) => ({ ...lf, [hash]: res && res.ok ? res.result || [] : [] }))
+        }).catch(() => setLogFiles((lf) => ({ ...lf, [hash]: [] })))
+      }
+      return next
+    })
+  }
+
+  /* 提交历史行：时间线节点（圆点 + 竖线）+ 提交信息 + 展开后作者·日期 + 文件改动列表 */
+  const renderLogRow = (row: GitLogEntry, index: number, total: number): React.ReactElement => {
     const refs = parseRefs(row.refs)
-    return React.createElement('div', { key: row.hashFull || row.hash, className: 'spr-logRow' },
-      React.createElement('div', { className: 'spr-logTop' },
-        React.createElement('span', { className: 'spr-logHash' }, row.hash),
+    const id = row.hashFull || row.hash
+    const open = expandedLog.has(id)
+    const files = logFiles[id]
+    const isLast = index === total - 1
+    return React.createElement('div', { key: id, className: 'spr-logRow', 'data-last': isLast ? 'true' : 'false' },
+      React.createElement('div', { className: 'spr-logTop', onClick: () => toggleLog(id) },
+        React.createElement('span', { className: 'spr-logNode' }),
+        React.createElement('span', { className: 'spr-logChevron', style: { transform: open ? 'rotate(90deg)' : 'none' } },
+          React.createElement(Icon, { name: 'chevron', size: 12 })),
         React.createElement('span', { className: 'spr-logSubject' }, row.subject),
         refs.length > 0
           ? React.createElement('span', { className: 'spr-logRefs' },
-              refs.map((r) => React.createElement('span', {
-                key: r.label, className: 'spr-logRef', 'data-kind': r.kind,
-              }, r.label)))
+              refs.map((r) => React.createElement('span', { key: r.label, className: 'spr-logRef', 'data-kind': r.kind }, r.label)))
           : null),
-      React.createElement('div', { className: 'spr-logMeta' }, row.author + ' · ' + timeLabel(new Date(row.date).getTime(), Date.now(), t)))
+      open ? React.createElement('div', { className: 'spr-logDetail' },
+        React.createElement('div', { className: 'spr-logMeta' }, row.author + ' · ' + timeLabel(new Date(row.date).getTime(), Date.now(), t)),
+        files === 'loading'
+          ? React.createElement('div', { className: 'spr-logLoading' }, React.createElement(Spinner, { size: 12 }))
+          : files && files.length > 0
+            ? React.createElement('div', { className: 'spr-logFiles' },
+                files.map((f) => React.createElement('div', { key: f.path, className: 'spr-logFile' },
+                  React.createElement('span', { className: 'spr-fileBadge', 'data-stage': f.status }, f.status),
+                  React.createElement('span', { className: 'spr-fileName', title: f.path }, f.path))))
+            : React.createElement('div', { className: 'spr-logMeta' }, t('noChanges')))
+        : null)
   }
 
   return React.createElement('div', { className: 'spr-git' },
@@ -247,7 +283,7 @@ export function GitPanel({ cwd, host, t }: { cwd: string | undefined; host: Host
                 collapsed: collapsed.history, onToggle: () => toggleSection('history'),
                 children: log.length === 0
                   ? React.createElement('div', { className: 'spr-noChanges' }, t('noChanges'))
-                  : React.createElement(React.Fragment, null, log.map(renderLogRow)),
+                  : React.createElement(React.Fragment, null, log.map((row, i) => renderLogRow(row, i, log.length))),
               }),
             )),
     status && status.isRepo
