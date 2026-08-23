@@ -5,6 +5,7 @@ export type IconName =
   | 'search' | 'plus' | 'minus' | 'close' | 'chevron' | 'folder' | 'file' | 'files'
   | 'git' | 'branch' | 'fork' | 'archive' | 'pencil' | 'trash' | 'undo'
   | 'refresh' | 'check' | 'panel' | 'spinner' | 'move'
+  | 'fileText' | 'fileCode' | 'image' | 'music' | 'film' | 'braces'
 
 const ICON_PATHS: Record<IconName, string> = {
   search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35',
@@ -17,6 +18,12 @@ const ICON_PATHS: Record<IconName, string> = {
   move: 'M2 6a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2ZM12 15v-6M9 12l3-3 3 3',
   file: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z M14 2v6h6',
   files: 'M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z',
+  fileText: 'M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7ZM14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8',
+  fileCode: 'M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7ZM14 2v4a2 2 0 0 0 2 2h4M10 13l-2 2 2 2M14 17l2-2-2-2',
+  image: 'M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2ZM9 9a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21',
+  music: 'M9 18V5l12-2v13M9 5V5M6 18a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM18 16a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',
+  film: 'M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5M4 2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z',
+  braces: 'M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1',
   git: 'M6 3v12M18 21a3 3 0 0 0 3-3v-1.5a3 3 0 0 0-3-3H9a3 3 0 0 1-3-3V6M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM18 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
   branch: 'M6 3v12M18 21a3 3 0 0 0 3-3v-1.5a3 3 0 0 0-3-3H9a3 3 0 0 1-3-3V6M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM18 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
   fork: 'M6 3v12M18 21a3 3 0 0 0 3-3v-1.5a3 3 0 0 0-3-3H9a3 3 0 0 1-3-3V6M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM18 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
@@ -43,6 +50,23 @@ export function Icon({ name, size = 16 }: { name: IconName; size?: number }): Re
     strokeLinejoin: 'round',
     'aria-hidden': true,
   }, React.createElement('path', { d: path }))
+}
+
+/** 按文件扩展名选择类型图标（未识别回退通用 file） */
+export function fileTypeIcon(name: string): IconName {
+  const ext = name.split('.').pop()?.toLowerCase() ?? ''
+  switch (ext) {
+    case 'js': case 'jsx': case 'mjs': case 'cjs': case 'ts': case 'tsx': return 'fileCode'
+    case 'json': return 'braces'
+    case 'css': case 'scss': case 'less': return 'fileCode'
+    case 'html': case 'htm': case 'vue': case 'xml': case 'yaml': case 'yml': return 'fileCode'
+    case 'py': case 'go': case 'rs': case 'java': case 'c': case 'cpp': case 'h': case 'sh': return 'fileCode'
+    case 'md': case 'markdown': case 'txt': case 'log': case 'csv': case 'env': return 'fileText'
+    case 'png': case 'jpg': case 'jpeg': case 'gif': case 'svg': case 'webp': case 'ico': case 'bmp': return 'image'
+    case 'mp3': case 'wav': case 'ogg': case 'flac': case 'm4a': return 'music'
+    case 'mp4': case 'mov': case 'avi': case 'webm': case 'mkv': return 'film'
+    default: return 'file'
+  }
 }
 
 export function Spinner({ size = 14 }: { size?: number }): React.ReactElement {
