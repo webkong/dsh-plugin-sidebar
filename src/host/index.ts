@@ -71,6 +71,7 @@ export function apply(ctx: { get(name: string): unknown; effect(cb: () => unknow
     },
     'git.log': async (p) => ({ ok: true, result: await git.log(shell, str(p.cwd), Number(p.count) || 20) }),
     'git.logFiles': async (p) => ({ ok: true, result: await git.logFiles(shell, str(p.cwd), str(p.hash)) }),
+    'git.showDiff': async (p) => ({ ok: true, result: await git.showDiff(shell, str(p.cwd), str(p.hash), str(p.path)) }),
     'git.branches': async (p) => ({ ok: true, result: await git.branches(shell, str(p.cwd)) }),
     'git.checkout': async (p) => {
       await git.checkout(shell, str(p.cwd), str(p.branch))

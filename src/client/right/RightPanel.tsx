@@ -33,7 +33,7 @@ export function RightPanel(props: RightPanelProps): React.ReactElement {
         React.createElement(Icon, { name: 'close', size: 15 }))),
     tab === 'files'
       ? React.createElement(FilesPanel, { cwd, sessionId, host, t })
-      : React.createElement(GitPanel, { cwd, host, t }))
+      : React.createElement(GitPanel, { cwd, sessionId, host, t }))
 }
 
 /** 头部开关：展开/收起右侧栏；随会话切换自动对齐该会话的记忆状态 */

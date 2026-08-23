@@ -41,3 +41,10 @@
 .pv-save { cursor: pointer; height: 24px; border: none; border-radius: 6px; background: color-mix(in srgb, var(--dsw-alias-state-business-primary, #3964fe) 12%, transparent); color: var(--dsw-alias-state-business-primary, #3964fe); font-size: 12px; font-weight: 600; padding: 0 10px; flex: none; }
 .pv-save:hover:not(:disabled) { background: color-mix(in srgb, var(--dsw-alias-state-business-primary, #3964fe) 20%, transparent); }
 .pv-save:disabled { opacity: .45; cursor: default; }
+.pv-diffBadge { flex: none; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: color-mix(in srgb, var(--dsw-alias-state-business-primary, #3964fe) 12%, transparent); color: var(--dsw-alias-state-business-primary, #3964fe); }
+/* diff 视图：只读，逐行着色 */
+.pv-diff { flex: 1; min-height: 0; overflow: auto; margin: 0 20px; padding: 12px 0; font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 12px; line-height: 18px; color: var(--pv-fg); }
+.pv-diff span { display: block; white-space: pre; }
+.pv-diff .pv-diffAdd { background: color-mix(in srgb, var(--dsw-alias-state-success-primary, #16a34a) 12%, transparent); color: var(--dsw-alias-state-success-primary, #16a34a); }
+.pv-diff .pv-diffDel { background: color-mix(in srgb, var(--dsw-alias-state-error-primary, #dc2626) 12%, transparent); color: var(--dsw-alias-state-error-primary, #dc2626); }
+.pv-diff .pv-diffMeta { color: var(--pv-fg-3); }

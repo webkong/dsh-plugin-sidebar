@@ -81,6 +81,20 @@ export function FilePreviewView({ sessionId, t, host }: FilePreviewViewProps): R
 
   const close = (): void => { previewStore.set(sid, null) }
 
+  const isDiff = preview != null && preview.mode === 'diff'
+
+  /* diff 视图：只读，逐行着色（+/−/@@ 元信息） */
+  const renderDiffView = (content: string): React.ReactElement => {
+    const lines = content.split('\n')
+    return React.createElement('pre', { className: 'pv-diff' },
+      lines.map((line, i) => {
+        const cls = line.startsWith('+') ? 'pv-diffAdd'
+          : line.startsWith('-') ? 'pv-diffDel'
+            : (line.startsWith('@@') || line.startsWith('diff ') || line.startsWith('index ') || line.startsWith('---') || line.startsWith('+++') || line.startsWith('old mode') || line.startsWith('new mode')) ? 'pv-diffMeta' : ''
+        return React.createElement('span', { key: i, className: cls }, line + '\n')
+      }))
+  }
+
   const save = async (): Promise<void> => {
     const view = viewRef.current
     const content = view ? view.state.doc.toString() : ''
@@ -97,7 +111,7 @@ export function FilePreviewView({ sessionId, t, host }: FilePreviewViewProps): R
     }
   }
 
-  const isText = preview != null && preview.kind === 'text'
+  const isEditableFile = preview != null && !isDiff && preview.kind === 'text'
 
   return React.createElement('div', { className: 'pv-root' },
     !preview
@@ -106,8 +120,9 @@ export function FilePreviewView({ sessionId, t, host }: FilePreviewViewProps): R
           React.createElement('div', { className: 'pv-head' },
             React.createElement('span', { className: 'pv-name', title: preview.path }, preview.name),
             preview.path !== preview.name ? React.createElement('span', { className: 'pv-path', title: preview.path }, preview.path) : null,
+            isDiff ? React.createElement('span', { className: 'pv-diffBadge' }, 'diff') : null,
             dirty ? React.createElement('span', { className: 'pv-dirty', title: t('dirty') }, '●') : null,
-            isText ? React.createElement('button', {
+            isEditableFile ? React.createElement('button', {
               type: 'button', className: 'pv-save', disabled: !dirty || saving,
               title: dirty ? (saving ? t('saving') : t('save')) : t('saved'),
               onClick: () => { void save() },
@@ -121,7 +136,9 @@ export function FilePreviewView({ sessionId, t, host }: FilePreviewViewProps): R
                 ? React.createElement('div', { className: 'pv-notice' }, t('binary'))
                 : preview.kind === 'error'
                   ? React.createElement('div', { className: 'pv-notice' }, preview.content)
-                  : React.createElement(React.Fragment, null,
-                      saveError ? React.createElement('div', { className: 'pv-notice', 'data-error': true }, saveError) : null,
-                      React.createElement('div', { className: 'pv-editor', ref: editorHostRef })))))
+                  : isDiff
+                    ? renderDiffView(preview.content)
+                    : React.createElement(React.Fragment, null,
+                        saveError ? React.createElement('div', { className: 'pv-notice', 'data-error': true }, saveError) : null,
+                        React.createElement('div', { className: 'pv-editor', ref: editorHostRef })))))
 }

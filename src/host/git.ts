@@ -200,6 +200,11 @@ export async function logFiles(shell: ShellService | undefined, cwd: string, has
   return parseNameStatus(raw)
 }
 
+/** 某次提交中某文件的 diff（供历史文件点击 → 预览 tab 显示变更；--format= 去掉 commit 头，只留文件 diff） */
+export async function showDiff(shell: ShellService | undefined, cwd: string, hash: string, path: string): Promise<string> {
+  return runGit(shell, cwd, ['show', '--no-ext-diff', '--no-color', '-U3', '--format=', hash, '--', path])
+}
+
 /** 切换分支 */
 export async function checkout(shell: ShellService | undefined, cwd: string, branch: string): Promise<void> {
   await runGit(shell, cwd, ['checkout', branch])

@@ -1,5 +1,6 @@
 // 文件预览共享 store：按会话隔离的文件预览状态。
-// 右侧栏 FilesPanel 点击文件时写入；主区域 conversation.view 的「文件预览」tab 订阅读取。
+// 右侧栏 FilesPanel 点击文件、Git 面板点击提交文件（diff）时写入；
+// 主区域 conversation.view 的「预览」tab 订阅读取。
 // 两侧同处一个插件 bundle，直接共享模块级状态 + useSyncExternalStore。
 export interface PreviewData {
   path: string
@@ -7,6 +8,8 @@ export interface PreviewData {
   kind: 'loading' | 'text' | 'binary' | 'error'
   content: string
   truncated?: boolean
+  /** 预览类型：file=普通文件（可编辑），diff=提交的变更（只读 diff 高亮） */
+  mode?: 'file' | 'diff'
 }
 
 const state = new Map<string, PreviewData | null>()

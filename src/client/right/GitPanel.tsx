@@ -5,6 +5,7 @@ import React from 'react'
 import { Icon, Spinner, type IconName } from '../icons.tsx'
 import { timeLabel, errMsg } from '../util.ts'
 import { badgeOf, isStaged, isUnstaged, isUntracked } from './derive.ts'
+import { previewStore } from '../previewStore.ts'
 import type { Translate } from '../i18n.ts'
 import type { HostApi, GitStatusResult, GitStatusEntry, GitLogEntry, GitLogFile, GitBranchesResult } from '../types.ts'
 
@@ -61,7 +62,7 @@ function CollapsibleSection(props: {
     collapsed ? null : React.createElement('div', { className: 'spr-sectionBody' }, children))
 }
 
-export function GitPanel({ cwd, host, t }: { cwd: string | undefined; host: HostApi; t: Translate }): React.ReactElement {
+export function GitPanel({ cwd, sessionId, host, t }: { cwd: string | undefined; sessionId: string; host: HostApi; t: Translate }): React.ReactElement {
   const [status, setStatus] = React.useState<GitStatusResult | null>(null)
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -238,6 +239,30 @@ export function GitPanel({ cwd, host, t }: { cwd: string | undefined; host: Host
     })
   }
 
+  /* 自动切换到主区域「预览」tab（DOM 点击 header 里 label 匹配的 tab 按钮） */
+  const activatePreviewTab = (label: string): void => {
+    const btn = Array.from(document.querySelectorAll<HTMLButtonElement>('button[role="tab"]'))
+      .find((b) => b.textContent === label)
+    if (btn && btn.getAttribute('aria-selected') !== 'true') btn.click()
+  }
+
+  /* 点击提交里的文件 → 在预览 tab 显示该提交对该文件的 diff（只读高亮） */
+  const openDiffInPreview = (hash: string, path: string): void => {
+    const name = path.split('/').pop() || path
+    previewStore.set(sessionId, { path, name, kind: 'loading', content: '', mode: 'diff' })
+    activatePreviewTab(t('view.preview'))
+    host.call('git.showDiff', { cwd, hash, path }).then((res) => {
+      if (res && res.ok) {
+        previewStore.set(sessionId, { path, name, kind: 'text', content: res.result || '', mode: 'diff' })
+      } else {
+        const msg = res && res.error ? res.error : 'diff failed'
+        previewStore.set(sessionId, { path, name, kind: 'error', content: msg, mode: 'diff' })
+      }
+    }).catch((err) => {
+      previewStore.set(sessionId, { path, name, kind: 'error', content: errMsg(err), mode: 'diff' })
+    })
+  }
+
   /* 提交历史行：时间线节点（圆点 + 竖线）+ 提交信息 + 展开后作者·日期 + 文件改动列表 */
   const renderLogRow = (row: GitLogEntry, index: number, total: number): React.ReactElement => {
     const refs = parseRefs(row.refs)
@@ -261,7 +286,10 @@ export function GitPanel({ cwd, host, t }: { cwd: string | undefined; host: Host
           ? React.createElement('div', { className: 'spr-logLoading' }, React.createElement(Spinner, { size: 12 }))
           : files && files.length > 0
             ? React.createElement('div', { className: 'spr-logFiles' },
-                files.map((f) => React.createElement('div', { key: f.path, className: 'spr-logFile' },
+                files.map((f) => React.createElement('div', {
+                  key: f.path, className: 'spr-logFile', 'data-diff': true,
+                  onClick: () => openDiffInPreview(id, f.path),
+                },
                   React.createElement('span', { className: 'spr-fileBadge', 'data-stage': f.status }, f.status),
                   React.createElement('span', { className: 'spr-fileName', title: f.path }, f.path))))
             : React.createElement('div', { className: 'spr-logMeta' }, t('noChanges')))
