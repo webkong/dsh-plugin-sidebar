@@ -69,6 +69,24 @@ export function fileTypeIcon(name: string): IconName {
   }
 }
 
+/** 按文件扩展名返回类型颜色（VSCode 风格，浅/深主题均可读）；未识别回退主题灰 */
+export function fileTypeColor(name: string): string {
+  const ext = name.split('.').pop()?.toLowerCase() ?? ''
+  switch (ext) {
+    case 'js': case 'jsx': case 'mjs': case 'cjs': case 'ts': case 'tsx': return '#519aba'
+    case 'json': return '#e37933'
+    case 'css': case 'scss': case 'less': return '#8957e5'
+    case 'html': case 'htm': case 'vue': return '#e34c26'
+    case 'xml': case 'yaml': case 'yml': return '#6a737d'
+    case 'py': case 'go': case 'rs': case 'java': case 'c': case 'cpp': case 'h': case 'sh': return '#3572a5'
+    case 'md': case 'markdown': case 'txt': case 'log': case 'csv': case 'env': return '#6a737d'
+    case 'png': case 'jpg': case 'jpeg': case 'gif': case 'svg': case 'webp': case 'ico': case 'bmp': return '#a074c4'
+    case 'mp3': case 'wav': case 'ogg': case 'flac': case 'm4a': return '#f9a825'
+    case 'mp4': case 'mov': case 'avi': case 'webm': case 'mkv': return '#e0614e'
+    default: return 'var(--spr-fg-3)'
+  }
+}
+
 export function Spinner({ size = 14 }: { size?: number }): React.ReactElement {
   return React.createElement('span', { style: { display: 'inline-flex' } },
     React.createElement('svg', {

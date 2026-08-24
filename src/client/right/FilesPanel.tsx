@@ -2,7 +2,7 @@
 // + 文件行尾部 git 状态徽标（仅 git 仓库）。点击文件：预览写入预览 store，主区域「文件预览」tab 展示并自动切换。
 // 数据经 HostApi 获取。
 import React from 'react'
-import { Icon, Spinner, fileTypeIcon } from '../icons.tsx'
+import { Icon, Spinner, fileTypeIcon, fileTypeColor } from '../icons.tsx'
 import { baseName, errMsg } from '../util.ts'
 import { badgeFromXy, badgeTitleKey, dirBadge } from './derive.ts'
 import { previewStore } from '../previewStore.ts'
@@ -209,7 +209,7 @@ export function FilesPanel({ cwd, sessionId, host, t }: { cwd: string | undefine
       key: node.path, className: 'spr-row', 'data-selected': selected === node.path ? 'true' : 'false',
       style: { paddingLeft: 8 + depth * 14 + 22 }, onClick: () => { void openFile(node.path, node.name) },
     },
-      React.createElement('span', { className: 'spr-rowIcon' }, React.createElement(Icon, { name: fileTypeIcon(node.name), size: 13 })),
+      React.createElement('span', { className: 'spr-rowIcon', style: { color: fileTypeColor(node.name) } }, React.createElement(Icon, { name: fileTypeIcon(node.name), size: 13 })),
       React.createElement('span', { className: 'spr-rowLabel' }, node.name),
       renderGitBadge(node.rel, false))
   }
@@ -235,7 +235,7 @@ export function FilesPanel({ cwd, sessionId, host, t }: { cwd: string | undefine
             key: m.path, className: 'spr-nameRow',
             onClick: () => { if (!m.isDir) void openFile(abs, baseName(m.path)) },
           },
-            React.createElement('span', { className: 'spr-nameIcon', 'data-type': m.isDir ? 'dir' : 'file' },
+            React.createElement('span', { className: 'spr-nameIcon', 'data-type': m.isDir ? 'dir' : 'file', style: m.isDir ? undefined : { color: fileTypeColor(m.path) } },
               React.createElement(Icon, { name: m.isDir ? 'folder' : fileTypeIcon(m.path), size: 13 })),
             React.createElement('span', { className: 'spr-namePath', title: m.path }, m.path),
             renderGitBadge(m.path, m.isDir))
