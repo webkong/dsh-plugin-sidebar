@@ -73,6 +73,13 @@ After restarting `dsh web`, the left sidebar takes over `sidebar.workspaces`, th
 
 > ⚠️ Takes effect after install/restart; Host changes require a `dsh web` restart, while Client changes (`lib/client.js`) only need a page refresh.
 
+## 🔖 Version Compatibility
+
+| Plugin version | Compatible dsh versions | Notes |
+| --- | --- | --- |
+| **0.3.x** | ≥ 0.1.1-rc.2 (verified on 0.1.1-rc.2 and 0.1.2-alpha.1) | Removed `dsh-client-runtime` from the client `inject` list (that package was removed in dsh 0.1.2) |
+| ≤ 0.2.x | ≤ 0.1.1-rc.x | On dsh ≥ 0.1.2 older clients never load while waiting for the removed `dsh-client-runtime` |
+
 ## 🔧 Development
 
 ```bash

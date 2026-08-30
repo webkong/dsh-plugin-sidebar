@@ -73,6 +73,13 @@ dsh plugin --profile web add /path/to/dsh-plugin-sidebar
 
 > ⚠️ 安装 / 重启后生效；Host 改动需重启 dsh web，Client 改动（`lib/client.js`）刷新页面即可。
 
+## 🔖 版本兼容
+
+| 插件版本 | 兼容的 dsh 版本 | 说明 |
+| --- | --- | --- |
+| **0.3.x** | ≥ 0.1.1-rc.2（已验证 0.1.1-rc.2 与 0.1.2-alpha.1） | client `inject` 移除 `dsh-client-runtime`（该包自 dsh 0.1.2 起被移除） |
+| ≤ 0.2.x | ≤ 0.1.1-rc.x | dsh ≥ 0.1.2 上旧版 client 将因等待不存在的 `dsh-client-runtime` 而无法加载 |
+
 ## 🔧 开发
 
 ```bash

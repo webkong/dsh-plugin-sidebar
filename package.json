@@ -1,6 +1,6 @@
 {
   "name": "@webkong/dsh-plugin-sidebar",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "🪟 DSH 左右侧栏插件：左侧工作区/会话浏览 + 会话移动到文件夹，右侧文件浏览 + Git 面板（VSCode 风格提交历史/状态徽标），主区域文件预览 tab。",
   "license": "MIT",
   "keywords": [
@@ -36,7 +36,6 @@
     "client": {
       "platform": "web",
       "inject": [
-        "@deepseek-ai/dsh-client-runtime",
         "@deepseek-ai/dsh-client-ui-slots",
         "@deepseek-ai/dsh-client-locale"
       ]
