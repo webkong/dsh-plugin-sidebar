@@ -49,7 +49,7 @@
 .spr-preview { border-top: 1px solid var(--spr-border); flex: none; max-height: 45%; min-height: 0; display: flex; flex-direction: column; }
 .spr-previewHead { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-bottom: 1px solid var(--spr-border); color: var(--spr-fg-2); font-size: 11px; font-weight: 600; }
 .spr-previewHead .spr-previewName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.spr-previewBody { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 8px 12px; font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 12px; line-height: 18px; white-space: pre; color: var(--spr-fg); }
+.spr-previewBody { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 8px 12px; font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 12px; line-height: 18px; white-space: pre; color: var(--spr-fg); user-select: text; -webkit-user-select: text; }
 .spr-previewNotice { padding: 8px 12px; font-size: 12px; color: var(--spr-fg-3); }
 .spr-git { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .spr-gitHead { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 10px; border-bottom: 1px solid var(--spr-border); flex: none; }
@@ -111,7 +111,8 @@
 .spr-diff { border-top: 1px solid var(--spr-border); flex: none; max-height: 50%; min-height: 0; display: flex; flex-direction: column; }
 .spr-diffHead { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-bottom: 1px solid var(--spr-border); color: var(--spr-fg-2); font-size: 11px; font-weight: 600; }
 .spr-diffHead .spr-diffName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.spr-diffBody { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 8px 12px; font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 12px; line-height: 18px; white-space: pre; }
+.spr-diffBody { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 8px 12px; font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 12px; line-height: 18px; white-space: pre; user-select: text; -webkit-user-select: text; }
+.spr-diffBody span { user-select: text; -webkit-user-select: text; }
 .spr-diffBody .spr-diffAdd { color: var(--spr-green); }
 .spr-diffBody .spr-diffDel { color: var(--spr-red); }
 .spr-diffBody .spr-diffMeta { color: var(--spr-fg-3); }
