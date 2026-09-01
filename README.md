@@ -61,8 +61,13 @@
 
 ## 📦 安装
 
+从 GitHub 或本地路径安装。**建议先确认你的 dsh 版本，再按下方的「版本兼容」选择配套的插件版本**：
+
 ```bash
-# 从 GitHub 安装
+# 从 GitHub 安装（推荐，按需指定版本）
+dsh plugin --profile web add github:webkong/dsh-plugin-sidebar@0.3.1
+
+# 或安装最新主分支
 dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#main
 
 # 或从本地路径安装（开发）
@@ -71,14 +76,30 @@ dsh plugin --profile web add /path/to/dsh-plugin-sidebar
 
 重启 dsh web 后，左侧栏接管 `sidebar.workspaces`，右侧栏接管 `details` 列，会话头部出现右栏开关。
 
-> ⚠️ 安装 / 重启后生效；Host 改动需重启 dsh web，Client 改动（`lib/client.js`）刷新页面即可。
+> ⚠️ **生效方式**：安装 / 重启后生效；**Host 改动需重启 dsh web**，**Client 改动（`lib/client.js`）刷新页面即可**。
+
+> 💡 **安装建议**：
+> - `dsh ≥ 0.1.2`（含 `0.1.2-alpha.3`）：**务必用 `0.3.1`**，已适配 dsh 0.1.2 的客户端服务迁移与懒解析；
+> - `dsh 0.1.1-rc.x`：可用 `0.3.1` 或 `0.3.0`；
+> - 更旧的 dsh：回到 `≤ 0.2.x`（但 `dsh ≥ 0.1.2` 上旧版 client 无法加载）。
 
 ## 🔖 版本兼容
 
+**速查：按你的 dsh 版本 → 推荐插件版本**
+
+| 你的 dsh 版本 | 兼容的插件版本 | 建议 |
+| --- | --- | --- |
+| **dsh ≥ 0.1.2**（含 `0.1.2-alpha.3`） | **0.3.1 或更高** | **推荐 0.3.1**：已适配 dsh 0.1.2 的 `uiWorkspace` 服务迁移与懒解析 |
+| **dsh 0.1.1-rc.x** | 0.3.0 – 0.3.1 | 均可；`0.3.0` 已验证 `0.1.1-rc.2` |
+| **dsh ≤ 0.1.1-rc.x** | ≤ 0.2.x | 旧版；在 `dsh ≥ 0.1.2` 上 client 因等待已移除的 `dsh-client-runtime` 而无法加载 |
+
+**详表：按插件版本 → 兼容的 dsh 版本**
+
 | 插件版本 | 兼容的 dsh 版本 | 说明 |
 | --- | --- | --- |
-| **0.3.x** | ≥ 0.1.1-rc.2（已验证 0.1.1-rc.2 与 0.1.2-alpha.1） | client `inject` 移除 `dsh-client-runtime`（该包自 dsh 0.1.2 起被移除） |
-| ≤ 0.2.x | ≤ 0.1.1-rc.x | dsh ≥ 0.1.2 上旧版 client 将因等待不存在的 `dsh-client-runtime` 而无法加载 |
+| **0.3.1** | dsh ≥ 0.1.1-rc.2（已验证 `0.1.1-rc.2`、`0.1.2-alpha.1`、`0.1.2-alpha.3`） | 适配 dsh 0.1.2 客户端服务迁移：`startSession` / `pickDirectory` 改经 **`uiWorkspace`** 服务调用（原挂在 `workspaces`）；`layout` / `sessions` / `workspaces` / `uiWorkspace` / `timer` 改为**调用时懒解析**（服务异步激活，不再在 apply 阶段缓存）。修复「右侧入口点击没反应」「左侧添加文件夹点击没反应」 |
+| **0.3.0** | dsh ≥ 0.1.1-rc.2（已验证 `0.1.1-rc.2`、`0.1.2-alpha.1`） | client `inject` 移除 `dsh-client-runtime`（该包自 dsh 0.1.2 起被移除）；**未适配** 0.1.2 的 `uiWorkspace` 服务迁移，在 `0.1.2-alpha.3` 上部分点击可能无响应 |
+| **≤ 0.2.x** | dsh ≤ 0.1.1-rc.x | 旧版；`dsh ≥ 0.1.2` 上 client 因等待已移除的 `dsh-client-runtime` 而无法加载 |
 
 ## 🔧 开发
 

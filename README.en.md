@@ -61,8 +61,13 @@ Browse every session by workspace on the left (status dots, groups, search, one-
 
 ## 📦 Install
 
+Install from GitHub or a local path. **First confirm your dsh version, then pick the plugin version that matches it per the Version Compatibility table below**:
+
 ```bash
-# From GitHub
+# From GitHub (recommended; pin the version to match your dsh)
+dsh plugin --profile web add github:webkong/dsh-plugin-sidebar@0.3.1
+
+# Or install the latest main branch
 dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#main
 
 # Or from a local path (development)
@@ -71,13 +76,30 @@ dsh plugin --profile web add /path/to/dsh-plugin-sidebar
 
 After restarting `dsh web`, the left sidebar takes over `sidebar.workspaces`, the right sidebar takes over the `details` column, and a panel toggle appears in the session header.
 
-> ⚠️ Takes effect after install/restart; Host changes require a `dsh web` restart, while Client changes (`lib/client.js`) only need a page refresh.
+> ⚠️ **How it takes effect**: install / restart; **Host changes require a `dsh web` restart**, while **Client changes (`lib/client.js`) only need a page refresh**.
+
+> 💡 **Install recommendation**:
+> - `dsh ≥ 0.1.2` (incl. `0.1.2-alpha.3`): **use `0.3.1`** — it adapts the dsh 0.1.2 client service migration and lazy resolution;
+> - `dsh 0.1.1-rc.x`: use `0.3.1` or `0.3.0`;
+> - older dsh: fall back to `≤ 0.2.x` (but on `dsh ≥ 0.1.2` the older client never loads).
 
 ## 🔖 Version Compatibility
 
+**Quick reference: your dsh version → recommended plugin version**
+
+| Your dsh version | Compatible plugin versions | Recommendation |
+| --- | --- | --- |
+| **dsh ≥ 0.1.2** (incl. `0.1.2-alpha.3`) | **0.3.1 or newer** | **Recommended `0.3.1`**: adapts the dsh 0.1.2 `uiWorkspace` service migration + lazy resolution |
+| **dsh 0.1.1-rc.x** | 0.3.0 – 0.3.1 | Either; `0.3.0` verified on `0.1.1-rc.2` |
+| **dsh ≤ 0.1.1-rc.x** | ≤ 0.2.x | Older; on `dsh ≥ 0.1.2` the client never loads (waits for the removed `dsh-client-runtime`) |
+
+**Detailed: plugin version → compatible dsh versions**
+
 | Plugin version | Compatible dsh versions | Notes |
 | --- | --- | --- |
-| **0.3.x** | ≥ 0.1.1-rc.2 (verified on 0.1.1-rc.2 and 0.1.2-alpha.1) | Removed `dsh-client-runtime` from the client `inject` list (that package was removed in dsh 0.1.2) |
+| **0.3.1** | dsh ≥ 0.1.1-rc.2 (verified on `0.1.1-rc.2`, `0.1.2-alpha.1`, `0.1.2-alpha.3`) | Adapted to the dsh 0.1.2 client service migration: `startSession` / `pickDirectory` now go through the **`uiWorkspace`** service (formerly on `workspaces`), and `layout`/`sessions`/`workspaces`/`uiWorkspace`/`timer` are **lazy-resolved at call time** (services activate asynchronously; no longer cached at apply time). Fixes "right-panel toggle no response" and "left add-folder no response" |
+| **0.3.0** | dsh ≥ 0.1.1-rc.2 (verified on `0.1.1-rc.2`, `0.1.2-alpha.1`) | Removed `dsh-client-runtime` from the client `inject` list (removed in dsh 0.1.2); **not adapted** to the 0.1.2 `uiWorkspace` migration, so some clicks may be unresponsive on `0.1.2-alpha.3` |
+| **≤ 0.2.x** | dsh ≤ 0.1.1-rc.x | Older; on `dsh ≥ 0.1.2` the client never loads while waiting for the removed `dsh-client-runtime` |
 | ≤ 0.2.x | ≤ 0.1.1-rc.x | On dsh ≥ 0.1.2 older clients never load while waiting for the removed `dsh-client-runtime` |
 
 ## 🔧 Development

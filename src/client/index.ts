@@ -48,7 +48,12 @@ export function apply(ctx: ClientCtx): void {
   const slots = ctx.get('slots') as SlotReg | undefined
   if (slots === undefined) return
 
-  const layout = ctx.get('layout') as { openDetails(): void; closeDetails(): void } | undefined
+  // 懒解析：layout 服务异步激活，apply 时未必就绪；每次调用时经 ctx.get 取最新实例，
+  // 避免 apply 阶段缓存到 undefined 导致「右侧入口点击没反应」。
+  const layout = {
+    openDetails: () => (ctx.get('layout') as { openDetails(): void } | undefined)?.openDetails?.(),
+    closeDetails: () => (ctx.get('layout') as { closeDetails(): void } | undefined)?.closeDetails?.(),
+  }
   const leftInject = buildLeftInject(ctx)
 
   // 左侧：工作区/会话浏览（接管 sidebar.workspaces）
@@ -115,48 +120,60 @@ export function apply(ctx: ClientCtx): void {
 
 /** 左侧浏览区的注入动作（与会话/工作区客户端服务对接） */
 export function buildLeftInject(ctx: ClientCtx): LeftInject {
-  const sessions = ctx.get('sessions') as any
-  const workspaces = ctx.get('workspaces') as any
-  const timer = ctx.get('timer') as any
-  return {
-    open: (sessionId: string) => sessions && sessions.open(sessionId),
-    startSession: (workspaceId?: string) => workspaces && workspaces.startSession(workspaceId),
+  // 懒解析：sessions / workspaces / uiWorkspace / timer 均为异步激活客户端服务，apply 时可能未就绪，
+  // 故每次调用时经 ctx.get 取最新实例——与 Host 侧 sessionQuery/workspaceRegistry 的懒解析策略一致，
+  // 避免 apply 阶段缓存 undefined 导致「左侧添加文件夹点击没反应」。
+  // 注意：dsh 0.1.2 之后 startSession / pickDirectory 从 workspaces 服务迁移到 uiWorkspace 服务，
+  // create / rename / delete / archiveSession 仍在 workspaces 服务上。
+  const sessionsOf = (): any => ctx.get('sessions') as any
+  const workspacesOf = (): any => ctx.get('workspaces') as any
+  const uiWorkspaceOf = (): any => ctx.get('uiWorkspace') as any
+  const timerOf = (): any => ctx.get('timer') as any
+  const inject: LeftInject = {
+    open: (sessionId: string) => { const s = sessionsOf(); if (s) s.open(sessionId) },
+    startSession: (workspaceId?: string) => { const uw = uiWorkspaceOf(); if (uw) uw.startSession(workspaceId) },
     searchSessions: async (query, signal) => {
-      if (!sessions) return { items: [], hasMore: false }
-      const result = await sessions.search(query, signal)
+      const s = sessionsOf()
+      if (!s) return { items: [], hasMore: false }
+      const result = await s.search(query, signal)
       if (!result.ok) throw new Error(result.error.message)
       return result.value
     },
-    searchResultLimit: sessions ? sessions.searchResultLimit : 20,
     forkSession: (sessionId: string) => {
-      if (!sessions) return
-      sessions.fork({ sessionId, increaseTitle: true }).then((childId: string) => sessions.open(childId)).catch(() => {})
+      const s = sessionsOf()
+      if (!s) return
+      s.fork({ sessionId, increaseTitle: true }).then((childId: string) => s.open(childId)).catch(() => {})
     },
     renameSession: async (sessionId, title) => {
-      if (!sessions) return
-      const binding = sessions.binding(sessionId)
+      const s = sessionsOf()
+      if (!s) return
+      const binding = s.binding(sessionId)
       if (!binding || !binding.session) throw new Error('unknown session ' + sessionId)
       const result = await binding.session.rename(title)
       if (!result.ok) throw new Error(result.error.message)
     },
-    archiveSession: async (sessionId) => { if (workspaces) await workspaces.archiveSession(sessionId) },
-    renameWorkspace: async (workspaceId, title) => { if (workspaces) await workspaces.rename(workspaceId, title) },
-    deleteWorkspace: async (workspaceId) => { if (workspaces) await workspaces.delete(workspaceId) },
+    archiveSession: async (sessionId) => { const w = workspacesOf(); if (w) await w.archiveSession(sessionId) },
+    renameWorkspace: async (workspaceId, title) => { const w = workspacesOf(); if (w) await w.rename(workspaceId, title) },
+    deleteWorkspace: async (workspaceId) => { const w = workspacesOf(); if (w) await w.delete(workspaceId) },
     copySessionTo: async (sessionId, workspace) => {
       const result = await call('session.copyTo', { srcId: sessionId, targetPath: workspace.path })
       return (result.result as { sessionId?: string } | undefined)?.sessionId
     },
     addWorkspace: async () => {
-      if (!workspaces) return
+      const uw = uiWorkspaceOf()
+      const w = workspacesOf()
+      if (!uw || !w) return
       try {
-        const path = await workspaces.pickDirectory()
+        const path = await uw.pickDirectory()
         if (!path) return
-        const ws = await workspaces.create({ path })
-        workspaces.startSession(ws.workspaceId)
+        const ws = await w.create({ path })
+        uw.startSession(ws.workspaceId)
       } catch (err) {
         console.error('add workspace failed', err)
       }
     },
-    timeout: (fn, ms) => { if (!timer) return () => {}; return timer.timeout(fn, ms) },
+    timeout: (fn, ms) => { const t = timerOf(); if (!t) return () => {}; return t.timeout(fn, ms) },
+    get searchResultLimit() { return sessionsOf()?.searchResultLimit ?? 20 },
   }
+  return inject
 }
