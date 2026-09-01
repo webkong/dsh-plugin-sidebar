@@ -29,10 +29,10 @@
 .pv-body .pv-notice { padding: 12px 16px; font-size: 13px; line-height: 20px; color: var(--pv-fg-3); }
 .pv-body .pv-notice[data-error] { color: var(--dsw-alias-state-error-primary, #dc2626); }
 /* 编辑器：带左右边距，跟随 DSH 主题，主区域深/浅色适配 */
-.pv-editor { flex: 1; min-height: 0; overflow: hidden; padding: 10px 20px; }
+.pv-editor { flex: 1; min-height: 0; overflow: hidden; padding: 10px 20px; user-select: text; -webkit-user-select: text; }
 .pv-editor .cm-editor { height: 100%; background: transparent; color: var(--pv-fg); outline: none; }
 .pv-editor .cm-scroller { font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 12px; line-height: 18px; }
-.pv-editor .cm-content { caret-color: var(--dsw-alias-state-business-primary, #3964fe); }
+.pv-editor .cm-content { caret-color: var(--dsw-alias-state-business-primary, #3964fe); user-select: text; -webkit-user-select: text; }
 .pv-editor .cm-gutters { background: transparent; color: var(--pv-fg-3); border-right: 1px solid var(--pv-border); }
 .pv-editor .cm-activeLine { background: color-mix(in srgb, var(--pv-fg) 4%, transparent); }
 .pv-editor .cm-activeLineGutter { background: color-mix(in srgb, var(--pv-fg) 4%, transparent); }
@@ -43,8 +43,8 @@
 .pv-save:disabled { opacity: .45; cursor: default; }
 .pv-diffBadge { flex: none; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: color-mix(in srgb, var(--dsw-alias-state-business-primary, #3964fe) 12%, transparent); color: var(--dsw-alias-state-business-primary, #3964fe); }
 /* diff 视图：只读，逐行着色 */
-.pv-diff { flex: 1; min-height: 0; overflow: auto; margin: 0 20px; padding: 12px 0; font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 12px; line-height: 18px; color: var(--pv-fg); }
-.pv-diff span { display: block; white-space: pre; }
+.pv-diff { flex: 1; min-height: 0; overflow: auto; margin: 0 20px; padding: 12px 0; font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 12px; line-height: 18px; color: var(--pv-fg); user-select: text; -webkit-user-select: text; }
+.pv-diff span { display: block; white-space: pre; user-select: text; -webkit-user-select: text; }
 .pv-diff .pv-diffAdd { background: color-mix(in srgb, var(--dsw-alias-state-success-primary, #16a34a) 12%, transparent); color: var(--dsw-alias-state-success-primary, #16a34a); }
 .pv-diff .pv-diffDel { background: color-mix(in srgb, var(--dsw-alias-state-error-primary, #dc2626) 12%, transparent); color: var(--dsw-alias-state-error-primary, #dc2626); }
 .pv-diff .pv-diffMeta { color: var(--pv-fg-3); }
