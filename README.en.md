@@ -65,8 +65,8 @@ Install from GitHub or a local path. **First confirm your dsh version, then pick
 
 ```bash
 # From GitHub (recommended; pin the version to match your dsh)
-# Note: pnpm's GitHub version-lock syntax uses `#tag`; the old `@0.3.1` form is mis-parsed by pnpm as the nonexistent repo null/0.3.1
-dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#v0.3.1
+# Note: pnpm's GitHub version-lock syntax uses `#tag`; the old `@0.3.2` form is mis-parsed by pnpm as the nonexistent repo null/0.3.2
+dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#v0.3.2
 
 # Or install the latest main branch
 dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#main
@@ -80,8 +80,8 @@ After restarting `dsh web`, the left sidebar takes over `sidebar.workspaces`, th
 > ⚠️ **How it takes effect**: install / restart; **Host changes require a `dsh web` restart**, while **Client changes (`lib/client.js`) only need a page refresh**.
 
 > 💡 **Install recommendation**:
-> - `dsh ≥ 0.1.2` (incl. `0.1.2-alpha.3`): **use `0.3.1`** — it adapts the dsh 0.1.2 client service migration and lazy resolution;
-> - `dsh 0.1.1-rc.x`: use `0.3.1` or `0.3.0`;
+> - `dsh ≥ 0.1.2` (incl. `0.1.2-alpha.3`): **use `0.3.2`** — it adapts the dsh 0.1.2 client service migration and lazy resolution;
+> - `dsh 0.1.1-rc.x`: use `0.3.2` or `0.3.1`;
 > - older dsh: fall back to `≤ 0.2.x` (but on `dsh ≥ 0.1.2` the older client never loads).
 
 ## 🔖 Version Compatibility
@@ -90,14 +90,15 @@ After restarting `dsh web`, the left sidebar takes over `sidebar.workspaces`, th
 
 | Your dsh version | Compatible plugin versions | Recommendation |
 | --- | --- | --- |
-| **dsh ≥ 0.1.2** (incl. `0.1.2-alpha.3`) | **0.3.1 or newer** | **Recommended `0.3.1`**: adapts the dsh 0.1.2 `uiWorkspace` service migration + lazy resolution |
-| **dsh 0.1.1-rc.x** | 0.3.0 – 0.3.1 | Either; `0.3.0` verified on `0.1.1-rc.2` |
+| **dsh ≥ 0.1.2** (incl. `0.1.2-alpha.3`) | **0.3.1 or newer** | **Recommended `0.3.2`**: adapts the dsh 0.1.2 `uiWorkspace` service migration + lazy resolution |
+| **dsh 0.1.1-rc.x** | 0.3.0 – 0.3.2 | Either; `0.3.0` verified on `0.1.1-rc.2` |
 | **dsh ≤ 0.1.1-rc.x** | ≤ 0.2.x | Older; on `dsh ≥ 0.1.2` the client never loads (waits for the removed `dsh-client-runtime`) |
 
 **Detailed: plugin version → compatible dsh versions**
 
 | Plugin version | Compatible dsh versions | Notes |
 | --- | --- | --- |
+| **0.3.2** | dsh ≥ 0.1.1-rc.2 | Left-panel hierarchy styling: the status dot left of a session title is indented rightward to emphasize the `folder → session` parent-child level; the session title font size is reduced from 13px to 12px |
 | **0.3.1** | dsh ≥ 0.1.1-rc.2 (verified on `0.1.1-rc.2`, `0.1.2-alpha.1`, `0.1.2-alpha.3`) | Adapted to the dsh 0.1.2 client service migration: `startSession` / `pickDirectory` now go through the **`uiWorkspace`** service (formerly on `workspaces`), and `layout`/`sessions`/`workspaces`/`uiWorkspace`/`timer` are **lazy-resolved at call time** (services activate asynchronously; no longer cached at apply time). Fixes "right-panel toggle no response" and "left add-folder no response" |
 | **0.3.0** | dsh ≥ 0.1.1-rc.2 (verified on `0.1.1-rc.2`, `0.1.2-alpha.1`) | Removed `dsh-client-runtime` from the client `inject` list (removed in dsh 0.1.2); **not adapted** to the 0.1.2 `uiWorkspace` migration, so some clicks may be unresponsive on `0.1.2-alpha.3` |
 | **≤ 0.2.x** | dsh ≤ 0.1.1-rc.x | Older; on `dsh ≥ 0.1.2` the client never loads while waiting for the removed `dsh-client-runtime` |

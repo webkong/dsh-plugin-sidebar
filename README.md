@@ -65,8 +65,8 @@
 
 ```bash
 # 从 GitHub 安装（推荐，按需指定版本）
-# 注意：pnpm 的 GitHub 版本锁定语法用 `#tag`，本文档旧写法 `@0.3.1` 会被 pnpm 误解析为不存在的仓库 null/0.3.1 而报错
-dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#v0.3.1
+# 注意：pnpm 的 GitHub 版本锁定语法用 `#tag`，本文档旧写法 `@0.3.2` 会被 pnpm 误解析为不存在的仓库 null/0.3.2 而报错
+dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#v0.3.2
 
 # 或安装最新主分支
 dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#main
@@ -80,8 +80,8 @@ dsh plugin --profile web add /path/to/dsh-plugin-sidebar
 > ⚠️ **生效方式**：安装 / 重启后生效；**Host 改动需重启 dsh web**，**Client 改动（`lib/client.js`）刷新页面即可**。
 
 > 💡 **安装建议**：
-> - `dsh ≥ 0.1.2`（含 `0.1.2-alpha.3`）：**务必用 `0.3.1`**，已适配 dsh 0.1.2 的客户端服务迁移与懒解析；
-> - `dsh 0.1.1-rc.x`：可用 `0.3.1` 或 `0.3.0`；
+> - `dsh ≥ 0.1.2`（含 `0.1.2-alpha.3`）：**务必用 `0.3.2`**，已适配 dsh 0.1.2 的客户端服务迁移与懒解析；
+> - `dsh 0.1.1-rc.x`：可用 `0.3.2` 或 `0.3.1`；
 > - 更旧的 dsh：回到 `≤ 0.2.x`（但 `dsh ≥ 0.1.2` 上旧版 client 无法加载）。
 
 ## 🔖 版本兼容
@@ -90,14 +90,15 @@ dsh plugin --profile web add /path/to/dsh-plugin-sidebar
 
 | 你的 dsh 版本 | 兼容的插件版本 | 建议 |
 | --- | --- | --- |
-| **dsh ≥ 0.1.2**（含 `0.1.2-alpha.3`） | **0.3.1 或更高** | **推荐 0.3.1**：已适配 dsh 0.1.2 的 `uiWorkspace` 服务迁移与懒解析 |
-| **dsh 0.1.1-rc.x** | 0.3.0 – 0.3.1 | 均可；`0.3.0` 已验证 `0.1.1-rc.2` |
+| **dsh ≥ 0.1.2**（含 `0.1.2-alpha.3`） | **0.3.1 或更高** | **推荐 0.3.2**：已适配 dsh 0.1.2 的 `uiWorkspace` 服务迁移与懒解析 |
+| **dsh 0.1.1-rc.x** | 0.3.0 – 0.3.2 | 均可；`0.3.0` 已验证 `0.1.1-rc.2` |
 | **dsh ≤ 0.1.1-rc.x** | ≤ 0.2.x | 旧版；在 `dsh ≥ 0.1.2` 上 client 因等待已移除的 `dsh-client-runtime` 而无法加载 |
 
 **详表：按插件版本 → 兼容的 dsh 版本**
 
 | 插件版本 | 兼容的 dsh 版本 | 说明 |
 | --- | --- | --- |
+| **0.3.2** | dsh ≥ 0.1.1-rc.2 | 左侧栏层级样式优化：会话标题左侧状态点右移缩进，突出「文件夹 → 会话」的从属层级；会话标题字号由 13px 调小至 12px |
 | **0.3.1** | dsh ≥ 0.1.1-rc.2（已验证 `0.1.1-rc.2`、`0.1.2-alpha.1`、`0.1.2-alpha.3`） | 适配 dsh 0.1.2 客户端服务迁移：`startSession` / `pickDirectory` 改经 **`uiWorkspace`** 服务调用（原挂在 `workspaces`）；`layout` / `sessions` / `workspaces` / `uiWorkspace` / `timer` 改为**调用时懒解析**（服务异步激活，不再在 apply 阶段缓存）。修复「右侧入口点击没反应」「左侧添加文件夹点击没反应」 |
 | **0.3.0** | dsh ≥ 0.1.1-rc.2（已验证 `0.1.1-rc.2`、`0.1.2-alpha.1`） | client `inject` 移除 `dsh-client-runtime`（该包自 dsh 0.1.2 起被移除）；**未适配** 0.1.2 的 `uiWorkspace` 服务迁移，在 `0.1.2-alpha.3` 上部分点击可能无响应 |
 | **≤ 0.2.x** | dsh ≤ 0.1.1-rc.x | 旧版；`dsh ≥ 0.1.2` 上 client 因等待已移除的 `dsh-client-runtime` 而无法加载 |

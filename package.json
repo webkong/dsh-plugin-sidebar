@@ -1,6 +1,6 @@
 {
   "name": "@webkong/dsh-plugin-sidebar",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "🪟 DSH 左右侧栏插件：左侧工作区/会话浏览 + 会话移动到文件夹，右侧文件浏览 + Git 面板（VSCode 风格提交历史/状态徽标），主区域文件预览 tab。",
   "license": "MIT",
   "keywords": [
