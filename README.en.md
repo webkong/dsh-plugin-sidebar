@@ -65,7 +65,8 @@ Install from GitHub or a local path. **First confirm your dsh version, then pick
 
 ```bash
 # From GitHub (recommended; pin the version to match your dsh)
-dsh plugin --profile web add github:webkong/dsh-plugin-sidebar@0.3.1
+# Note: pnpm's GitHub version-lock syntax uses `#tag`; the old `@0.3.1` form is mis-parsed by pnpm as the nonexistent repo null/0.3.1
+dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#v0.3.1
 
 # Or install the latest main branch
 dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#main

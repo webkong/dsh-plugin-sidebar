@@ -65,7 +65,8 @@
 
 ```bash
 # 从 GitHub 安装（推荐，按需指定版本）
-dsh plugin --profile web add github:webkong/dsh-plugin-sidebar@0.3.1
+# 注意：pnpm 的 GitHub 版本锁定语法用 `#tag`，本文档旧写法 `@0.3.1` 会被 pnpm 误解析为不存在的仓库 null/0.3.1 而报错
+dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#v0.3.1
 
 # 或安装最新主分支
 dsh plugin --profile web add github:webkong/dsh-plugin-sidebar#main
